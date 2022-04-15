@@ -1,4 +1,5 @@
 import styles from './app.module.css';
+import 'index.css';
 
 export default function App() {
   return (

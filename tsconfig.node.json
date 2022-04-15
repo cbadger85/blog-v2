@@ -5,8 +5,10 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "noUnusedLocals": false,
+    "esModuleInterop": true
   },
-  "include": ["vite.config.js"],
+  "include": ["vite.config.js", "server.ts"],
   "references": [{ "path": "./tsconfig.json" }]
 }

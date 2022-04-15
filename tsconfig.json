@@ -20,7 +20,8 @@
     },
     "baseUrl": "./src",
     "types": ["vitest/globals"],
-    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "noUnusedLocals": false
   },
   "include": ["./src", "custom.d.ts", "global.d.ts", "./setupTests.ts"]
 }
