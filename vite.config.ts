@@ -7,33 +7,21 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ mode }) => {
-  return {
+  const baseConfig = defineConfig({
     plugins: [
       react(),
       tsconfigPaths(),
-      checker({
-        overlay: false,
-        typescript: true,
-        eslint: { lintCommand: 'eslint "./src/**/*.{ts,tsx}"' },
-      }),
+      !['ssr', 'build'].includes(mode) &&
+        checker({
+          overlay: false,
+          typescript: true,
+          eslint: { lintCommand: 'eslint "./src/**/*.{ts,tsx}"' },
+        }),
     ],
     resolve: {
       alias: {
         '~': path.resolve(__dirname, 'src'),
       },
-    },
-    build: {
-      outDir: mode === 'ssr' ? 'build/server' : 'build/client',
-      ssr: 'src/server.tsx',
-      minify: mode !== 'ssr',
-      // lib:
-      //   mode === 'ssr'
-      //     ? {
-      //         entry: 'src/server.tsx',
-      //         fileName: 'server',
-      //         formats: ['es'],
-      //       }
-      //     : undefined,
     },
     test: {
       globals: true,
@@ -41,5 +29,23 @@ export default defineConfig(({ mode }) => {
       reporters: 'verbose',
       setupFiles: ['./setupTests.ts'],
     },
-  };
+  });
+
+  switch (mode) {
+    case 'ssr':
+      return {
+        ...baseConfig,
+        build: {
+          outDir: 'build/server',
+          ssr: 'src/server.tsx',
+        },
+      };
+    default:
+      return {
+        ...baseConfig,
+        build: {
+          outDir: 'build/client',
+        },
+      };
+  }
 });

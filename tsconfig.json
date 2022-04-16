@@ -23,5 +23,5 @@
     "plugins": [{ "name": "typescript-plugin-css-modules" }],
     "noUnusedLocals": false
   },
-  "include": ["./src", "custom.d.ts", "global.d.ts", "./setupTests.ts"]
+  "include": ["./src", "custom.d.ts", "global.d.ts", "./setupTests.ts", "generator.ts"]
 }

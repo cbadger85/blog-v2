@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Component, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
@@ -19,9 +20,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { hasError: true };
   }
 
-  componentDidCatch(_error: Error, _errorInfo: any) {
-    // console.error(error);
-    // console.log(errorInfo);
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error(error);
+    console.log(errorInfo);
   }
 
   render() {

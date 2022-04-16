@@ -10,8 +10,8 @@ interface AppProps {
 const Home = lazy(() => import('pages/Home').then((module) => ({ default: module.Home })));
 const About = lazy(() => import('pages/About').then((module) => ({ default: module.About })));
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ context }: AppProps) {
-  console.log(context);
   return (
     <div className={styles.app} id="App">
       <h1>React App</h1>

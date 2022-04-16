@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable import/no-extraneous-dependencies */
 import dotenv from 'dotenv';
 import express from 'express';
@@ -5,25 +6,25 @@ import fs from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { fileURLToPath } from 'url';
-import { createServer as createViteServer } from 'vite';
-import serveStatic from 'serve-static';
+import { createServer as createViteServer, build, InlineConfig } from 'vite';
 
 const readFileAsync = fs.promises.readFile;
 
 dotenv.config();
 
-const port = process.env.SERVER_PORT;
-const isProd = process.env.NODE_ENV === 'production';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function devServer() {
+  const port = process.env.SERVER_PORT || 3000;
+  const open = process.env.SERVER_OPEN_BROWSER === 'true';
+
   const app = express();
 
   const vite = await createViteServer({
     server: {
       middlewareMode: 'ssr',
+      open,
     },
   });
 
@@ -61,50 +62,76 @@ async function devServer() {
   });
 
   app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Development server started on port: ${port}`);
+    console.log(`Development server started on: http://localhost:${port}`);
   });
 }
 
-async function prodServer() {
-  const app = express();
+async function generate() {
+  const pages = [
+    { route: '/', name: 'index.html' },
+    { route: '/about', name: 'about.html' },
+  ];
 
-  app.use(serveStatic(path.resolve(__dirname, 'build/client'), { index: false }));
+  await build({ mode: 'build' } as InlineConfig);
+  await build({ mode: 'ssr' } as InlineConfig);
 
-  app.use('*', async (req, res, next) => {
-    try {
-      const url = req.originalUrl;
-
-      const { render } = await import(path.resolve(__dirname, 'build/server/server.js'));
-      const template = await readFileAsync(
-        path.resolve(__dirname, 'build/client/index.html'),
-        'utf8'
-      );
-
-      const context = { foo: 'bar' };
-
-      const page = await render(url, context).then((html: string) =>
-        template.replace('<!--ssr-->', html).replace('<!--ssr-data-->', scriptifyContext(context))
-      );
-
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(page);
-    } catch (e: unknown) {
-      next(e);
-    }
+  const vite = await createViteServer({
+    server: {
+      middlewareMode: 'ssr',
+    },
   });
 
-  app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Production server started on port: ${port}`);
-  });
+  try {
+    const preloader = await vite
+      .ssrLoadModule(path.resolve(__dirname, 'src/loaders.ts'))
+      .then((loaders) => loaders.preload);
+    vite.close();
+
+    const template = await readFileAsync(
+      path.resolve(__dirname, 'build/client/index.html'),
+      'utf8'
+    ).then((html) => html.replace('<!--ssr-data-->', scriptifyContext(preloader())));
+
+    fs.promises.rename(
+      path.join(__dirname, 'build/server/server.js'),
+      path.join(__dirname, 'build/server/server.cjs')
+    );
+
+    const { render } = await import(path.resolve(__dirname, 'build/server/server.cjs'));
+
+    const [header, body] = template.split('<!--ssr-->');
+
+    pages.forEach((page) => {
+      const writeStream = fs.createWriteStream(path.resolve(__dirname, 'build/client', page.name));
+
+      writeStream.write(header, 'utf-8');
+
+      render(page.route, preloader(), ({ pipe }: PipeableStream) => {
+        pipe(writeStream);
+        writeStream.write(body);
+        writeStream.end();
+      });
+
+      writeStream.on('error', (e: Error) => {
+        console.error(e);
+        throw new Error(`Unable to write file ${page.name}`);
+      });
+
+      writeStream.on('finish', () => {
+        console.log(`generated ${page.name}`);
+      });
+    });
+  } catch (e: unknown) {
+    console.error(e);
+  }
 }
-
-const createServer = isProd ? prodServer : devServer;
-
-createServer();
 
 function scriptifyContext(context: unknown): string {
   return `<script>(function() { window.__CONTEXT_DATA__ = ${JSON.stringify(
     context
   )}; })()</script>`;
 }
+
+const start = process.argv.includes('generate') ? generate : devServer;
+
+start();

@@ -7,8 +7,9 @@
     "resolveJsonModule": true,
     "downlevelIteration": true,
     "noUnusedLocals": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "jsx": "react-jsx"
   },
-  "include": ["vite.config.js", "generator.ts"],
+  "include": ["vite.config.js"],
   "references": [{ "path": "./tsconfig.json" }]
 }
