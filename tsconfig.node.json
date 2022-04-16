@@ -9,6 +9,6 @@
     "noUnusedLocals": false,
     "esModuleInterop": true
   },
-  "include": ["vite.config.js", "server.ts"],
+  "include": ["vite.config.js", "generator.ts"],
   "references": [{ "path": "./tsconfig.json" }]
 }

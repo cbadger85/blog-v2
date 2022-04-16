@@ -1,11 +1,24 @@
+import { Router } from 'components/Router';
 import { StrictMode } from 'react';
-import { renderToString } from 'react-dom/server';
+import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
+import { Writable } from 'stream';
 import App from './App';
 
-export async function render(_url: string): Promise<string> {
-  return renderToString(
+export function render(
+  url: string,
+  context: unknown,
+  onAllReady: (stream: PipeableStream) => Writable
+) {
+  const stream = renderToPipeableStream(
     <StrictMode>
-      <App />
-    </StrictMode>
+      <Router location={url}>
+        <App context={context} />
+      </Router>
+    </StrictMode>,
+    {
+      // eslint-disable-next-line no-console
+      onShellError: (e) => console.error(e),
+      onAllReady: () => onAllReady(stream),
+    }
   );
 }

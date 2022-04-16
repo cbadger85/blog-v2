@@ -24,6 +24,16 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: mode === 'ssr' ? 'build/server' : 'build/client',
+      ssr: 'src/server.tsx',
+      minify: mode !== 'ssr',
+      // lib:
+      //   mode === 'ssr'
+      //     ? {
+      //         entry: 'src/server.tsx',
+      //         fileName: 'server',
+      //         formats: ['es'],
+      //       }
+      //     : undefined,
     },
     test: {
       globals: true,

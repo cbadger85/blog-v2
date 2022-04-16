@@ -1,5 +1,0 @@
-{
-  "ext": "ts,json,tsx",
-  "ignore": ["**/*.spec.ts", "**/*.test.ts", "**/*.spec.tsx", "**/*.test.tsx"],
-  "exec": "ts-node --esm server.ts"
-}

@@ -43,7 +43,9 @@
       "error",
       { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
     ],
-    "no-underscore-dangle": "off"
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }]
   },
   "settings": {
     "import/resolver": {
