@@ -1,4 +1,4 @@
-import { Router } from 'components/Router';
+import { BrowserRouter } from 'react-router-dom';
 import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
@@ -15,9 +15,9 @@ async function main() {
       container,
       <StrictMode>
         <HelmetProvider>
-          <Router>
+          <BrowserRouter>
             <App preloadedData={preloadedData} initialProps={initialProps} />
-          </Router>
+          </BrowserRouter>
         </HelmetProvider>
       </StrictMode>
     );

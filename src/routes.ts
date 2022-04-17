@@ -18,5 +18,4 @@ export interface PageProps<T> {
 export interface RouteConfig {
   component: LazyExoticComponent<ComponentType<PageProps<any>>>;
   getStaticProps?: () => Promise<unknown>;
-  routes?: Record<string, RouteConfig>;
 }

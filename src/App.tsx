@@ -1,5 +1,5 @@
 import { ErrorBoundary } from 'components/ErrorBoundary/ErrorBoundary';
-import { Route, Routes } from 'components/Router';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import 'index.css';
 import { Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -13,6 +13,10 @@ interface AppProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ initialProps = {}, preloadedData = {} }: AppProps) {
+  const staticProps = useLocation().state || initialProps;
+
+  console.log(staticProps);
+
   return (
     <div className={styles.app} id="App">
       <Helmet htmlAttributes={{ lang: 'en' }}>
@@ -24,12 +28,11 @@ export default function App({ initialProps = {}, preloadedData = {} }: AppProps)
       <h1>React App</h1>
       <Suspense>
         <ErrorBoundary>
-          <Routes fallback={<div>Oops</div>}>
+          <Routes>
             {Object.entries(routes).map(([path, { component: Component }]) => (
-              <Route key={path} path={path}>
-                <Component staticProps={initialProps} />
-              </Route>
+              <Route key={path} path={path} element={<Component staticProps={staticProps} />} />
             ))}
+            <Route element={<div>Oops</div>} />
           </Routes>
         </ErrorBoundary>
       </Suspense>

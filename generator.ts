@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import { createServer as createViteServer, build } from 'vite';
 
 const readFileAsync = fs.promises.readFile;
+const writeFileAsync = fs.promises.writeFile;
 
 dotenv.config();
 
@@ -42,8 +43,20 @@ async function devServer() {
         path.resolve(__dirname, 'src/server.tsx')
       );
 
+      if (url.endsWith('.json')) {
+        const jsonData = await getJsonDataLoaders(routes)[url]?.();
+
+        if (jsonData) {
+          res.send(jsonData);
+          return;
+        }
+
+        res.send({});
+        return;
+      }
+
       const preloadedData = await preloader();
-      const initialProps = await routes[url].getStaticProps();
+      const initialProps = (await routes[url]?.getStaticProps()) || {};
 
       render(
         url,
@@ -77,33 +90,46 @@ async function devServer() {
 
 async function generate() {
   try {
-    await build({ mode: 'build' });
     await build({ mode: 'ssr' });
-
-    const template = await readFileAsync(
-      path.resolve(__dirname, 'build/client/index.html'),
-      'utf8'
-    );
 
     const { render, preloader, routes } = await import(
       path.resolve(__dirname, 'build/server/server.js')
     );
 
-    const pages = Object.entries(routes).map(([route]) => {
-      const routeSegments = route.split('/');
-      const name = `${routeSegments[routeSegments.length - 1] || 'index'}.html`;
+    await build({ mode: 'build' });
+    const template = await readFileAsync(
+      path.resolve(__dirname, 'build/client/index.html'),
+      'utf8'
+    );
 
-      return {
-        route,
-        name,
-      };
-    });
+    const pages = Object.entries<{ getStaticProps?: () => Promise<unknown> }>(routes).map(
+      ([route, { getStaticProps }]) => {
+        const routeSegments = route.split('/');
+        const name = `${routeSegments[routeSegments.length - 1] || 'index'}.html`;
+        const jsonPath = `${route === '/' ? '/home' : route}.json`.substring(1);
+
+        return {
+          route,
+          json: { path: jsonPath, getStaticProps },
+          name,
+        };
+      }
+    );
 
     pages.forEach(async (page) => {
       const preloadedData = await preloader();
       const initialProps = await routes[page.route].getStaticProps();
 
-      const writeStream = fs.createWriteStream(path.resolve(__dirname, 'build/client', page.name));
+      const htmWriteStream = fs.createWriteStream(
+        path.resolve(__dirname, 'build/client', page.name)
+      );
+
+      console.log(path.resolve(__dirname, 'build/client', page.json.path));
+
+      writeFileAsync(
+        path.resolve(__dirname, 'build/client', page.json.path),
+        JSON.stringify((await page.json.getStaticProps?.()) || {})
+      );
 
       render(
         page.route,
@@ -115,19 +141,19 @@ async function generate() {
             initialProps,
           }).split('<!--ssr-->');
 
-          writeStream.write(header, 'utf-8');
-          pipe(writeStream);
-          writeStream.write(body);
-          writeStream.end();
+          htmWriteStream.write(header, 'utf-8');
+          pipe(htmWriteStream);
+          htmWriteStream.write(body);
+          htmWriteStream.end();
         }
       );
 
-      writeStream.on('error', (e: Error) => {
+      htmWriteStream.on('error', (e: Error) => {
         console.error(e);
         throw new Error(`Unable to write file ${page.name}`);
       });
 
-      writeStream.on('finish', () => {
+      htmWriteStream.on('finish', () => {
         console.log(`generated ${page.name}`);
       });
     });
@@ -156,6 +182,17 @@ function hydrateTemplate(
     .replace('<!--ssr-meta-->', helmetData.meta.toString())
     .replace('<!--ssr-link-->', helmetData.link.toString())
     .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
+}
+
+type RouteConfig = Record<string, { getStaticProps?: () => Promise<unknown> }>;
+
+function getJsonDataLoaders(route: RouteConfig) {
+  return Object.fromEntries(
+    Object.entries(route).map(([url, { getStaticProps }]) => [
+      `${url === '/' ? '/home' : url}.json`,
+      getStaticProps,
+    ])
+  );
 }
 
 const start = process.argv.includes('generate') ? generate : devServer;

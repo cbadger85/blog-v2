@@ -1,4 +1,4 @@
-import { Router } from 'components/Router';
+import { StaticRouter } from 'react-router-dom/server.js';
 import { StrictMode } from 'react';
 import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
@@ -15,9 +15,9 @@ export function render(
   const stream = renderToPipeableStream(
     <StrictMode>
       <HelmetProvider context={helmetData}>
-        <Router location={url}>
+        <StaticRouter location={url}>
           <App preloadedData={preloadedData} initialProps={initialProps} />
-        </Router>
+        </StaticRouter>
       </HelmetProvider>
     </StrictMode>,
     {

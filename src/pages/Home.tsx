@@ -1,3 +1,4 @@
+import { Link } from 'components/Link';
 import { PageProps } from 'routes';
 
 export function getStaticProps() {
@@ -8,9 +9,8 @@ export function getStaticProps() {
 export default function Home({ staticProps }: PageProps<ReturnType<typeof getStaticProps>>) {
   return (
     <div>
-      {' '}
       <h1>HOME</h1>
-      <a href="/about">about</a>
+      <Link to="/about">about</Link>
     </div>
   );
 }
