@@ -25,3 +25,5 @@ export function render(
     }
   );
 }
+
+export { preloader } from './loaders';

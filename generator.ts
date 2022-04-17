@@ -35,17 +35,15 @@ async function devServer() {
     try {
       const url = req.originalUrl;
 
-      const preloader = await vite
-        .ssrLoadModule(path.resolve(__dirname, 'src/loaders.ts'))
-        .then((loaders) => loaders.preload);
-
-      const preloadedData = preloader();
-
       const template = await readFileAsync(path.resolve(__dirname, 'index.html'), 'utf8').then(
         (file) => vite.transformIndexHtml(url, file)
       );
 
-      const { render } = await vite.ssrLoadModule(path.resolve(__dirname, 'src/server.tsx'));
+      const { render, preloader } = await vite.ssrLoadModule(
+        path.resolve(__dirname, 'src/server.tsx')
+      );
+
+      const preloadedData = preloader();
 
       render(url, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
         const [header, body] = template
@@ -82,20 +80,9 @@ async function generate() {
     { route: '/about', name: 'about.html' },
   ];
 
-  await build({ mode: 'build' } as InlineConfig);
-  await build({ mode: 'ssr' } as InlineConfig);
-
-  const vite = await createViteServer({
-    server: {
-      middlewareMode: 'ssr',
-    },
-  });
-
   try {
-    const preloader = await vite
-      .ssrLoadModule(path.resolve(__dirname, 'src/loaders.ts'))
-      .then((loaders) => loaders.preload);
-    vite.close();
+    await build({ mode: 'build' } as InlineConfig);
+    await build({ mode: 'ssr' } as InlineConfig);
 
     const template = await readFileAsync(
       path.resolve(__dirname, 'build/client/index.html'),
@@ -106,7 +93,7 @@ async function generate() {
       path.join(__dirname, 'build/server/server.cjs')
     );
 
-    const { render } = await import(path.resolve(__dirname, 'build/server/server.cjs'));
+    const { render, preloader } = await import(path.resolve(__dirname, 'build/server/server.cjs'));
 
     pages.forEach((page) => {
       const preloadedData = preloader();
