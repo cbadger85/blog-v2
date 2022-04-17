@@ -38,10 +38,12 @@ export default defineConfig(({ mode }) => {
         build: {
           outDir: 'build/server',
           ssr: 'src/server.tsx',
+          rollupOptions: {
+            output: {
+              format: 'es',
+            },
+          },
         },
-        // ssr: {
-        //   externals: ['react-helmet'],
-        // },
       };
     default:
       return {

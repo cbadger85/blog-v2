@@ -7,7 +7,7 @@ import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
 import { fileURLToPath } from 'url';
-import { createServer as createViteServer, build, InlineConfig } from 'vite';
+import { createServer as createViteServer, build } from 'vite';
 
 const readFileAsync = fs.promises.readFile;
 
@@ -76,19 +76,15 @@ async function generate() {
   ];
 
   try {
-    await build({ mode: 'build' } as InlineConfig);
-    await build({ mode: 'ssr' } as InlineConfig);
+    await build({ mode: 'build' });
+    await build({ mode: 'ssr' });
 
     const template = await readFileAsync(
       path.resolve(__dirname, 'build/client/index.html'),
       'utf8'
     );
 
-    await fs.promises.rename(
-      path.join(__dirname, 'build/server/server.js'),
-      path.join(__dirname, 'build/server/server.cjs')
-    );
-    const { render, preloader } = await import(path.resolve(__dirname, 'build/server/server.cjs'));
+    const { render, preloader } = await import(path.resolve(__dirname, 'build/server/server.js'));
 
     pages.forEach((page) => {
       const preloadedData = preloader();

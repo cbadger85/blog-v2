@@ -5,11 +5,12 @@ import { lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import styles from './app.module.css';
 
+const Home = lazy(() => import('pages/Home').then((module) => ({ default: module.Home })));
+const About = lazy(() => import('pages/About').then((module) => ({ default: module.About })));
+
 interface AppProps {
   context?: unknown;
 }
-const Home = lazy(() => import('pages/Home').then((module) => ({ default: module.Home })));
-const About = lazy(() => import('pages/About').then((module) => ({ default: module.About })));
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ context }: AppProps) {
