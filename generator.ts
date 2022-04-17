@@ -5,7 +5,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
-import { HelmetData } from 'react-helmet';
+import { HelmetServerState } from 'react-helmet-async';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer, build, InlineConfig } from 'vite';
 
@@ -45,7 +45,7 @@ async function devServer() {
 
       const preloadedData = preloader();
 
-      render(url, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
+      render(url, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetServerState) => {
         const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
           '<!--ssr-->'
         );
@@ -95,16 +95,20 @@ async function generate() {
 
       const writeStream = fs.createWriteStream(path.resolve(__dirname, 'build/client', page.name));
 
-      render(page.route, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
-        const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
-          '<!--ssr-->'
-        );
+      render(
+        page.route,
+        preloadedData,
+        ({ pipe }: PipeableStream, helmetData: HelmetServerState) => {
+          const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
+            '<!--ssr-->'
+          );
 
-        writeStream.write(header, 'utf-8');
-        pipe(writeStream);
-        writeStream.write(body);
-        writeStream.end();
-      });
+          writeStream.write(header, 'utf-8');
+          pipe(writeStream);
+          writeStream.write(body);
+          writeStream.end();
+        }
+      );
 
       writeStream.on('error', (e: Error) => {
         console.error(e);
@@ -120,7 +124,11 @@ async function generate() {
   }
 }
 
-function hydrateTemplate(template: string, helmetData: HelmetData, context: unknown): string {
+function hydrateTemplate(
+  template: string,
+  helmetData: HelmetServerState,
+  context: unknown
+): string {
   const contextScript = `<script>(function() { window.__CONTEXT_DATA__ = ${JSON.stringify(
     context
   )}; })()</script>`;

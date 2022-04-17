@@ -2,7 +2,7 @@ import { ErrorBoundary } from 'components/ErrorBoundary/ErrorBoundary';
 import { Route, Routes } from 'components/Router';
 import 'index.css';
 import { lazy, Suspense } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import styles from './app.module.css';
 
 interface AppProps {

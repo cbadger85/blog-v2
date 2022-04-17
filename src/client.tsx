@@ -1,6 +1,7 @@
 import { Router } from 'components/Router';
 import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 
 async function main() {
@@ -12,9 +13,11 @@ async function main() {
     hydrateRoot(
       container,
       <StrictMode>
-        <Router>
-          <App context={context} />
-        </Router>
+        <HelmetProvider>
+          <Router>
+            <App context={context} />
+          </Router>
+        </HelmetProvider>
       </StrictMode>
     );
   }
