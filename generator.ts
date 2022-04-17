@@ -5,6 +5,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
+import { HelmetData } from 'react-helmet';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer, build, InlineConfig } from 'vite';
 
@@ -38,17 +39,26 @@ async function devServer() {
         .ssrLoadModule(path.resolve(__dirname, 'src/loaders.ts'))
         .then((loaders) => loaders.preload);
 
-      const template = await readFileAsync(path.resolve(__dirname, 'index.html'), 'utf8')
-        .then((file) => vite.transformIndexHtml(url, file))
-        .then((html) => html.replace('<!--ssr-data-->', scriptifyContext(preloader())));
+      const preloadedData = preloader();
+
+      const template = await readFileAsync(path.resolve(__dirname, 'index.html'), 'utf8').then(
+        (file) => vite.transformIndexHtml(url, file)
+      );
 
       const { render } = await vite.ssrLoadModule(path.resolve(__dirname, 'src/server.tsx'));
 
-      const [header, body] = template.split('<!--ssr-->');
+      render(url, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
+        const [header, body] = template
+          .replace('<!--ssr-data-->', scriptifyContext(preloadedData))
+          .replace('data-ssr-html-attributes', helmetData.htmlAttributes.toString())
+          .replace('<!--ssr-title-->', helmetData.title.toString())
+          .replace('<!--ssr-meta-->', helmetData.meta.toString())
+          .replace('<!--ssr-link-->', helmetData.link.toString())
+          .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString())
+          .split('<!--ssr-->');
 
-      res.status(200).set({ 'Content-Type': 'text/html' });
-      res.write(header);
-      render(url, preloader(), ({ pipe }: PipeableStream) => {
+        res.status(200).set({ 'Content-Type': 'text/html' });
+        res.write(header);
         pipe(res);
         res.write(body);
         res.end();
@@ -90,8 +100,7 @@ async function generate() {
     const template = await readFileAsync(
       path.resolve(__dirname, 'build/client/index.html'),
       'utf8'
-    ).then((html) => html.replace('<!--ssr-data-->', scriptifyContext(preloader())));
-
+    );
     fs.promises.rename(
       path.join(__dirname, 'build/server/server.js'),
       path.join(__dirname, 'build/server/server.cjs')
@@ -99,14 +108,22 @@ async function generate() {
 
     const { render } = await import(path.resolve(__dirname, 'build/server/server.cjs'));
 
-    const [header, body] = template.split('<!--ssr-->');
-
     pages.forEach((page) => {
+      const preloadedData = preloader();
+
       const writeStream = fs.createWriteStream(path.resolve(__dirname, 'build/client', page.name));
 
-      writeStream.write(header, 'utf-8');
+      render(page.route, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
+        const [header, body] = template
+          .replace('<!--ssr-data-->', scriptifyContext(preloadedData))
+          .replace('data-ssr-html-attributes', helmetData.htmlAttributes.toString())
+          .replace('<!--ssr-title-->', helmetData.title.toString())
+          .replace('<!--ssr-meta-->', helmetData.meta.toString())
+          .replace('<!--ssr-link-->', helmetData.link.toString())
+          .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString())
+          .split('<!--ssr-->');
 
-      render(page.route, preloader(), ({ pipe }: PipeableStream) => {
+        writeStream.write(header, 'utf-8');
         pipe(writeStream);
         writeStream.write(body);
         writeStream.end();

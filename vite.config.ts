@@ -39,6 +39,9 @@ export default defineConfig(({ mode }) => {
           outDir: 'build/server',
           ssr: 'src/server.tsx',
         },
+        // ssr: {
+        //   externals: ['react-helmet'],
+        // },
       };
     default:
       return {
