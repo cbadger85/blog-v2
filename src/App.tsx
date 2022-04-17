@@ -7,11 +7,12 @@ import styles from './app.module.css';
 import { routes } from './routes';
 
 interface AppProps {
-  context?: unknown;
+  initialProps?: any;
+  preloadedData?: any;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function App({ context }: AppProps) {
+export default function App({ initialProps = {}, preloadedData = {} }: AppProps) {
   return (
     <div className={styles.app} id="App">
       <Helmet htmlAttributes={{ lang: 'en' }}>
@@ -26,7 +27,7 @@ export default function App({ context }: AppProps) {
           <Routes fallback={<div>Oops</div>}>
             {Object.entries(routes).map(([path, { component: Component }]) => (
               <Route key={path} path={path}>
-                <Component />
+                <Component staticProps={initialProps} />
               </Route>
             ))}
           </Routes>

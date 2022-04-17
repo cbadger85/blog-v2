@@ -38,23 +38,30 @@ async function devServer() {
         (file) => vite.transformIndexHtml(url, file)
       );
 
-      const { render, preloader } = await vite.ssrLoadModule(
+      const { render, preloader, routes } = await vite.ssrLoadModule(
         path.resolve(__dirname, 'src/server.tsx')
       );
 
-      const preloadedData = preloader();
+      const preloadedData = await preloader();
+      const initialProps = await routes[url].getStaticProps();
 
-      render(url, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetServerState) => {
-        const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
-          '<!--ssr-->'
-        );
+      render(
+        url,
+        preloadedData,
+        initialProps,
+        ({ pipe }: PipeableStream, helmetData: HelmetServerState) => {
+          const [header, body] = hydrateTemplate(template, helmetData, {
+            preloadedData,
+            initialProps,
+          }).split('<!--ssr-->');
 
-        res.status(200).set({ 'Content-Type': 'text/html' });
-        res.write(header);
-        pipe(res);
-        res.write(body);
-        res.end();
-      });
+          res.status(200).set({ 'Content-Type': 'text/html' });
+          res.write(header);
+          pipe(res);
+          res.write(body);
+          res.end();
+        }
+      );
     } catch (e: unknown) {
       if (e instanceof Error) {
         vite.ssrFixStacktrace(e);
@@ -69,11 +76,6 @@ async function devServer() {
 }
 
 async function generate() {
-  // const pages = [
-  //   { route: '/', name: 'index.html' },
-  //   { route: '/about', name: 'about.html' },
-  // ];
-
   try {
     await build({ mode: 'build' });
     await build({ mode: 'ssr' });
@@ -97,18 +99,21 @@ async function generate() {
       };
     });
 
-    pages.forEach((page) => {
-      const preloadedData = preloader();
+    pages.forEach(async (page) => {
+      const preloadedData = await preloader();
+      const initialProps = await routes[page.route].getStaticProps();
 
       const writeStream = fs.createWriteStream(path.resolve(__dirname, 'build/client', page.name));
 
       render(
         page.route,
         preloadedData,
+        initialProps,
         ({ pipe }: PipeableStream, helmetData: HelmetServerState) => {
-          const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
-            '<!--ssr-->'
-          );
+          const [header, body] = hydrateTemplate(template, helmetData, {
+            preloadedData,
+            initialProps,
+          }).split('<!--ssr-->');
 
           writeStream.write(header, 'utf-8');
           pipe(writeStream);
@@ -131,14 +136,19 @@ async function generate() {
   }
 }
 
+interface TemplateData {
+  preloadedData: unknown;
+  initialProps: unknown;
+}
+
 function hydrateTemplate(
   template: string,
   helmetData: HelmetServerState,
-  context: unknown
+  { preloadedData, initialProps }: TemplateData
 ): string {
-  const contextScript = `<script>(function() { window.__CONTEXT_DATA__ = ${JSON.stringify(
-    context
-  )}; })()</script>`;
+  const contextScript = `<script>(function() { window.__PRELOADED_DATA__ = ${JSON.stringify(
+    preloadedData
+  )}; window.__INITIAL_PROPS__ = ${JSON.stringify(initialProps)} })()</script>`;
   return template
     .replace('<!--ssr-data-->', contextScript)
     .replace('data-ssr-html-attributes', helmetData.htmlAttributes.toString())

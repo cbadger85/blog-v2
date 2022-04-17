@@ -7,7 +7,8 @@ import App from './App';
 
 export function render(
   url: string,
-  context: unknown,
+  preloadedData: unknown,
+  initialProps: unknown,
   onAllReady: (stream: PipeableStream, hydratedHelmetData: HelmetServerState) => Writable
 ) {
   const helmetData = {};
@@ -15,7 +16,7 @@ export function render(
     <StrictMode>
       <HelmetProvider context={helmetData}>
         <Router location={url}>
-          <App context={context} />
+          <App preloadedData={preloadedData} initialProps={initialProps} />
         </Router>
       </HelmetProvider>
     </StrictMode>,

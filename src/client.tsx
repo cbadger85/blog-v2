@@ -7,7 +7,8 @@ import App from './App';
 async function main() {
   const container = document.getElementById('root');
 
-  const context = window.__CONTEXT_DATA__;
+  const preloadedData = window.__PRELOADED_DATA__;
+  const initialProps = window.__INITIAL_PROPS__;
 
   if (container) {
     hydrateRoot(
@@ -15,7 +16,7 @@ async function main() {
       <StrictMode>
         <HelmetProvider>
           <Router>
-            <App context={context} />
+            <App preloadedData={preloadedData} initialProps={initialProps} />
           </Router>
         </HelmetProvider>
       </StrictMode>

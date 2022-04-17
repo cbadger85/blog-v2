@@ -1,5 +1,5 @@
 const bar = 'bar';
 
-export function preloader() {
+export async function preloader() {
   return { foo: bar };
 }
