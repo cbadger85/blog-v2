@@ -32,7 +32,8 @@
           "**/*.test.{ts,tsx}",
           "**/*.spec.{ts,tsx}",
           "setupTests.ts",
-          "vite.config.ts"
+          "vite.config.ts",
+          "generator.ts"
         ]
       }
     ],

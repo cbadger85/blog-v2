@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-/* eslint-disable import/no-extraneous-dependencies */
 import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'fs';
@@ -70,10 +69,10 @@ async function devServer() {
 }
 
 async function generate() {
-  const pages = [
-    { route: '/', name: 'index.html' },
-    { route: '/about', name: 'about.html' },
-  ];
+  // const pages = [
+  //   { route: '/', name: 'index.html' },
+  //   { route: '/about', name: 'about.html' },
+  // ];
 
   try {
     await build({ mode: 'build' });
@@ -84,7 +83,19 @@ async function generate() {
       'utf8'
     );
 
-    const { render, preloader } = await import(path.resolve(__dirname, 'build/server/server.js'));
+    const { render, preloader, routes } = await import(
+      path.resolve(__dirname, 'build/server/server.js')
+    );
+
+    const pages = Object.entries(routes).map(([route]) => {
+      const routeSegments = route.split('/');
+      const name = `${routeSegments[routeSegments.length - 1] || 'index'}.html`;
+
+      return {
+        route,
+        name,
+      };
+    });
 
     pages.forEach((page) => {
       const preloadedData = preloader();

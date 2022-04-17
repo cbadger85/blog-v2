@@ -32,3 +32,4 @@ export function render(
 }
 
 export { preloader } from './loaders';
+export { routes } from './routes';
