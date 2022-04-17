@@ -46,14 +46,9 @@ async function devServer() {
       const preloadedData = preloader();
 
       render(url, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
-        const [header, body] = template
-          .replace('<!--ssr-data-->', scriptifyContext(preloadedData))
-          .replace('data-ssr-html-attributes', helmetData.htmlAttributes.toString())
-          .replace('<!--ssr-title-->', helmetData.title.toString())
-          .replace('<!--ssr-meta-->', helmetData.meta.toString())
-          .replace('<!--ssr-link-->', helmetData.link.toString())
-          .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString())
-          .split('<!--ssr-->');
+        const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
+          '<!--ssr-->'
+        );
 
         res.status(200).set({ 'Content-Type': 'text/html' });
         res.write(header);
@@ -88,11 +83,11 @@ async function generate() {
       path.resolve(__dirname, 'build/client/index.html'),
       'utf8'
     );
-    fs.promises.rename(
+
+    await fs.promises.rename(
       path.join(__dirname, 'build/server/server.js'),
       path.join(__dirname, 'build/server/server.cjs')
     );
-
     const { render, preloader } = await import(path.resolve(__dirname, 'build/server/server.cjs'));
 
     pages.forEach((page) => {
@@ -101,14 +96,9 @@ async function generate() {
       const writeStream = fs.createWriteStream(path.resolve(__dirname, 'build/client', page.name));
 
       render(page.route, preloadedData, ({ pipe }: PipeableStream, helmetData: HelmetData) => {
-        const [header, body] = template
-          .replace('<!--ssr-data-->', scriptifyContext(preloadedData))
-          .replace('data-ssr-html-attributes', helmetData.htmlAttributes.toString())
-          .replace('<!--ssr-title-->', helmetData.title.toString())
-          .replace('<!--ssr-meta-->', helmetData.meta.toString())
-          .replace('<!--ssr-link-->', helmetData.link.toString())
-          .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString())
-          .split('<!--ssr-->');
+        const [header, body] = hydrateTemplate(template, helmetData, preloadedData).split(
+          '<!--ssr-->'
+        );
 
         writeStream.write(header, 'utf-8');
         pipe(writeStream);
@@ -130,10 +120,17 @@ async function generate() {
   }
 }
 
-function scriptifyContext(context: unknown): string {
-  return `<script>(function() { window.__CONTEXT_DATA__ = ${JSON.stringify(
+function hydrateTemplate(template: string, helmetData: HelmetData, context: unknown): string {
+  const contextScript = `<script>(function() { window.__CONTEXT_DATA__ = ${JSON.stringify(
     context
   )}; })()</script>`;
+  return template
+    .replace('<!--ssr-data-->', contextScript)
+    .replace('data-ssr-html-attributes', helmetData.htmlAttributes.toString())
+    .replace('<!--ssr-title-->', helmetData.title.toString())
+    .replace('<!--ssr-meta-->', helmetData.meta.toString())
+    .replace('<!--ssr-link-->', helmetData.link.toString())
+    .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
 }
 
 const start = process.argv.includes('generate') ? generate : devServer;
