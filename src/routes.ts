@@ -16,6 +16,7 @@ export interface PageProps<T> {
 }
 
 export interface RouteConfig {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: LazyExoticComponent<ComponentType<PageProps<any>>>;
   getStaticProps?: () => Promise<unknown>;
 }

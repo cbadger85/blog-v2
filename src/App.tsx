@@ -1,14 +1,17 @@
 import { ErrorBoundary } from 'components/ErrorBoundary/ErrorBoundary';
-import { Route, Routes } from 'react-router-dom';
+import { Page } from 'components/Page';
+import { PageDataProvider } from 'components/PageDataProvider';
 import 'index.css';
 import { Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { PageDataProvider } from 'components/PageDataProvider/PageDataProvider';
+import { Route, Routes } from 'react-router-dom';
 import styles from './app.module.css';
 import { routes } from './routes';
 
 interface AppProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialProps?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preloadedData?: any;
 }
 
@@ -26,18 +29,12 @@ export default function App({ initialProps = {}, preloadedData = {} }: AppProps)
       <Suspense>
         <ErrorBoundary>
           <PageDataProvider initialProps={initialProps}>
-            {({ activePageData }) => (
-              <Routes>
-                {Object.entries(routes).map(([path, { component: Component }]) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={activePageData !== null && <Component staticProps={activePageData} />}
-                  />
-                ))}
-                <Route path="*" element={<div>Oops</div>} />
-              </Routes>
-            )}
+            <Routes>
+              {Object.entries(routes).map(([path, { component }]) => (
+                <Route key={path} path={path} element={<Page component={component} />} />
+              ))}
+              <Route path="*" element={<div>Oops</div>} />
+            </Routes>
           </PageDataProvider>
         </ErrorBoundary>
       </Suspense>

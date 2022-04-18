@@ -1,29 +1,60 @@
-import { ReactNode, useEffect, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const PageDataContext = createContext<{ staticProps: any; loadData(href: string): void }>({
+  staticProps: null,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  loadData() {},
+});
+
+export const usePageData = () => useContext(PageDataContext);
+
 interface PageDataProviderProps {
-  children: (activePageData: any) => ReactNode;
+  children: ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialProps: any;
 }
 
 export function PageDataProvider({ children, initialProps }: PageDataProviderProps) {
   const { pathname } = useLocation();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [pageDataCache, setPageDataCache] = useState<Record<string, any>>({
     [pathname]: initialProps,
   });
-  const activePageData = pageDataCache[pathname] ?? null;
+
+  const staticProps = pageDataCache[pathname] ?? null;
+
+  const loadData = useCallback(
+    (href: string) => {
+      if (pageDataCache[href] === undefined) {
+        getStaticProps(href).then((props) => {
+          setPageDataCache({ ...pageDataCache, [href]: props });
+        });
+      }
+    },
+    [pageDataCache]
+  );
+
+  const context = useMemo(() => {
+    return { staticProps, loadData };
+  }, [loadData, staticProps]);
 
   useEffect(() => {
-    if (activePageData === null) {
-      getStaticProps(pathname).then((props) => {
-        setPageDataCache((cache) => ({ ...cache, [pathname]: props }));
-      });
-    }
-  }, [pathname, activePageData]);
+    loadData(pathname);
+  }, [pathname, loadData]);
 
-  return <>{children({ activePageData })}</>;
+  return <PageDataContext.Provider value={context}>{children}</PageDataContext.Provider>;
 }
 
 async function getStaticProps(href: string) {
@@ -35,8 +66,6 @@ async function getStaticProps(href: string) {
       if (!contentType || !contentType.includes('application/json')) {
         return {};
       }
-
-      console.log(res.data);
 
       return res.data;
     })
