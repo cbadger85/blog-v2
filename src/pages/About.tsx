@@ -11,6 +11,7 @@ export default function About({ staticProps }: PageProps<ReturnType<typeof getSt
     <div>
       <h1>ABOUT</h1>
       <Link to="/">home</Link>
+      <div>{JSON.stringify(staticProps, null, 2)}</div>
     </div>
   );
 }
