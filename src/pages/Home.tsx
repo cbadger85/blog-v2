@@ -7,6 +7,7 @@ export function getStaticProps() {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function Home({ staticProps }: PageProps<ReturnType<typeof getStaticProps>>) {
+  console.log({ staticProps });
   return (
     <div>
       <h1>HOME</h1>

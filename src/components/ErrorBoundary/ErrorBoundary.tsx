@@ -3,6 +3,7 @@ import { Component, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
   children?: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -21,18 +22,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error(error);
-    console.log(errorInfo);
+    if (import.meta.env.DEV) {
+      console.error(error);
+      console.log(errorInfo);
+    }
   }
 
   render() {
+    const { children, fallback = null } = this.props;
     const { hasError } = this.state;
-    const { children } = this.props;
 
     if (hasError) {
-      // You can render any custom fallback UI
-      return <h1>Something went wrong.</h1>;
+      return fallback;
     }
-    return <>{children}</>;
+    return children;
   }
 }
