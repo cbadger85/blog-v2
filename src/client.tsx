@@ -1,7 +1,9 @@
-import { BrowserRouter } from 'react-router-dom';
+import { queryClient } from 'client/queryClient';
 import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
+import { QueryClientProvider } from 'react-query';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
 async function main() {
@@ -14,11 +16,13 @@ async function main() {
     hydrateRoot(
       container,
       <StrictMode>
-        <HelmetProvider>
-          <BrowserRouter>
-            <App preloadedData={preloadedData} initialProps={initialProps} />
-          </BrowserRouter>
-        </HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <HelmetProvider>
+            <BrowserRouter>
+              <App preloadedData={preloadedData} initialProps={initialProps} />
+            </BrowserRouter>
+          </HelmetProvider>
+        </QueryClientProvider>
       </StrictMode>
     );
   }

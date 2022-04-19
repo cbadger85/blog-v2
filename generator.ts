@@ -120,11 +120,9 @@ async function generate() {
       const preloadedData = await preloader();
       const initialProps = await routes[page.route].getStaticProps();
 
-      const htmWriteStream = fs.createWriteStream(
+      const htmlWriteStream = fs.createWriteStream(
         path.resolve(__dirname, 'build/client', page.name)
       );
-
-      console.log(path.resolve(__dirname, 'build/client', page.json.path));
 
       writeFileAsync(
         path.resolve(__dirname, 'build/client', page.json.path),
@@ -141,20 +139,20 @@ async function generate() {
             initialProps,
           }).split('<!--ssr-->');
 
-          htmWriteStream.write(header, 'utf-8');
-          pipe(htmWriteStream);
-          htmWriteStream.write(body);
-          htmWriteStream.end();
+          htmlWriteStream.write(header, 'utf-8');
+          pipe(htmlWriteStream);
+          htmlWriteStream.write(body);
+          htmlWriteStream.end();
         }
       );
 
-      htmWriteStream.on('error', (e: Error) => {
+      htmlWriteStream.on('error', (e: Error) => {
         console.error(e);
         throw new Error(`Unable to write file ${page.name}`);
       });
 
-      htmWriteStream.on('finish', () => {
-        console.log(`generated ${page.name}`);
+      htmlWriteStream.on('finish', () => {
+        // TODO
       });
     });
   } catch (e: unknown) {

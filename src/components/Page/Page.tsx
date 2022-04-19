@@ -5,10 +5,8 @@ import { PageProps } from 'routes';
 import { loadStaticProps } from 'client/loadStaticProps';
 
 interface PageDataProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  component: FC<PageProps<any>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialProps: any;
+  component: FC<PageProps<unknown>>;
+  initialProps: unknown;
 }
 
 export function Page({ component: Component, initialProps }: PageDataProps) {

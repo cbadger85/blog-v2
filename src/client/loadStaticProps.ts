@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export async function loadStaticProps(href: string) {
+export async function loadStaticProps(href: string): Promise<unknown> {
   return axios
     .get(`${href === '/' ? 'home' : href}.json`)
     .then((res) => {
