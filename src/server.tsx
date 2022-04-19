@@ -2,16 +2,25 @@ import { StaticRouter } from 'react-router-dom/server.js';
 import { StrictMode } from 'react';
 import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
-import { Writable } from 'stream';
 import { QueryClientProvider } from 'react-query';
 import { queryClient } from 'client/queryClient';
 import App from './App';
 
+interface PageData {
+  preloadedData: unknown;
+  initialProps: unknown;
+}
+
+type OnReadyCallback = (
+  stream: PipeableStream,
+  hydratedHelmetData: HelmetServerState,
+  e: unknown
+) => void;
+
 export function render(
   url: string,
-  preloadedData: unknown,
-  initialProps: unknown,
-  onAllReady: (stream: PipeableStream, hydratedHelmetData: HelmetServerState) => Writable
+  { preloadedData, initialProps }: PageData,
+  onAllReady: OnReadyCallback
 ) {
   const helmetData = {};
   const stream = renderToPipeableStream(
@@ -25,13 +34,12 @@ export function render(
       </QueryClientProvider>
     </StrictMode>,
     {
-      // eslint-disable-next-line no-console
-      onShellError: (e) => console.error(e),
+      onShellError: (e) => onAllReady(stream, {} as HelmetServerState, e),
       onAllReady: () => {
-        const { helmet } = helmetData as HelmetData['context'];
         queryClient.clear();
+        const { helmet } = helmetData as HelmetData['context'];
 
-        onAllReady(stream, helmet);
+        onAllReady(stream, helmet, null);
       },
     }
   );
