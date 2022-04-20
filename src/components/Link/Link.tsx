@@ -1,7 +1,5 @@
-// import { loadStaticProps } from 'client/loadStaticProps';
 import { usePreload } from 'components/PageDataCache/PageDataCache';
 import { forwardRef, HTMLAttributeAnchorTarget, ReactNode } from 'react';
-// import { useQueryClient } from 'react-query';
 import { To, useHref, useLinkClickHandler } from 'react-router-dom';
 
 interface LinkProps {
@@ -26,7 +24,6 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         href={href}
         onClick={handleClick}
         onMouseEnter={() => {
-          // queryClient.prefetchQuery([href], () => loadStaticProps(href));
           preload(href);
         }}
       >

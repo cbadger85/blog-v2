@@ -1,15 +1,14 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { noop } from 'utils';
 
 const PageDataCacheContext = createContext<{
   preload: (href: string) => void;
   queryPageData: (href: string) => unknown;
 }>({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  preload() {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  queryPageData() {},
+  preload: noop,
+  queryPageData: noop,
 });
 
 export function useQueryPageData(href: string): unknown {
@@ -50,23 +49,32 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
     return { [pathname]: { status: 'SUCCESS', data: initialProps } };
   });
 
-  const loadData = useCallback((href: string) => {
-    const pendingData = loadStaticProps(href)
-      .then((data) =>
-        setCache((oldCache) => ({ ...oldCache, [href]: { status: 'SUCCESS', data } }))
-      )
-      .catch((e: unknown) =>
-        setCache((oldCache) => ({ ...oldCache, [href]: { status: 'ERROR', error: e } }))
-      );
-    setCache((oldCache) => ({ ...oldCache, [href]: { status: 'PENDING', pendingData } }));
-  }, []);
+  const loadData = useCallback(
+    (href: string) => {
+      const cacheStatus = cache[href]?.status;
+
+      if (['SUCCESS', 'PENDING'].includes(cacheStatus as string)) {
+        return;
+      }
+
+      const pendingData = loadStaticProps(href)
+        .then((data) =>
+          setCache((oldCache) => ({ ...oldCache, [href]: { status: 'SUCCESS', data } }))
+        )
+        .catch((error: unknown) =>
+          setCache((oldCache) => ({ ...oldCache, [href]: { status: 'ERROR', error } }))
+        );
+
+      setCache((oldCache) => ({ ...oldCache, [href]: { status: 'PENDING', pendingData } }));
+    },
+    [cache]
+  );
 
   const queryPageData = useCallback(
     (href: string) => {
       const currentData = cache[href];
+
       switch (currentData?.status) {
-        case undefined:
-          throw loadData(href);
         case 'ERROR':
           throw currentData.error;
         case 'PENDING':
@@ -74,7 +82,7 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
         case 'SUCCESS':
           return currentData.data;
         default:
-          throw new Error('Invalid cache status');
+          throw loadData(href);
       }
     },
     [cache, loadData]
@@ -91,6 +99,12 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
   return <PageDataCacheContext.Provider value={context}>{children}</PageDataCacheContext.Provider>;
 }
 
+class PageDataNotFoundError extends Error {
+  constructor(private href: string) {
+    super(`page data not found at ${href}`);
+  }
+}
+
 async function loadStaticProps(href: string): Promise<unknown> {
   return axios
     .get(`${href === '/' ? 'home' : href}.json`)
@@ -98,7 +112,7 @@ async function loadStaticProps(href: string): Promise<unknown> {
       const contentType = res.headers['content-type'];
 
       if (!contentType || !contentType.includes('application/json')) {
-        return {};
+        throw new PageDataNotFoundError(href);
       }
 
       return res.data;
@@ -108,6 +122,6 @@ async function loadStaticProps(href: string): Promise<unknown> {
         // eslint-disable-next-line no-console
         console.error(e);
       }
-      return {};
+      throw new PageDataNotFoundError(href);
     });
 }

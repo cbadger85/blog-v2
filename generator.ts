@@ -60,8 +60,7 @@ async function devServer() {
 
       render(
         url,
-        preloadedData,
-        initialProps,
+        { preloadedData, initialProps },
         ({ pipe }: PipeableStream, helmetData: HelmetServerState, err: unknown) => {
           if (err !== null) {
             console.error(err);

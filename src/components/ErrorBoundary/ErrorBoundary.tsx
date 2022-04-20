@@ -23,6 +23,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   componentDidCatch(error: Error, errorInfo: any) {
+    console.log('eh?');
     if (import.meta.env.DEV) {
       console.error(error);
       console.log(errorInfo);
