@@ -6,7 +6,7 @@ import { App } from '@generator/components/App';
 import { AppProps } from './types';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
-  import.meta.globEager('@app/App.(tsx|ts|jsx|js)')
+  import.meta.globEager('@app/app.(tsx|ts|jsx|js)')
 )[0]?.default;
 
 interface PageData {

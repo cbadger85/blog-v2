@@ -129,8 +129,14 @@ async function generate() {
       );
       const jsonFile = route
         .getStaticProps?.()
-        .then((props) => writeFileAsync(jsonFilePath, JSON.stringify(props)))
-        .then(() => console.log(path.relative(root, jsonFilePath)));
+        .then((props) => {
+          if (props) {
+            return writeFileAsync(jsonFilePath, JSON.stringify(props)).then(() => true);
+          }
+
+          return Promise.resolve(false);
+        })
+        .then((isWritten) => isWritten && console.log(path.relative(root, jsonFilePath)));
 
       return [htmlFile, jsonFile];
     });

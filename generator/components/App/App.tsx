@@ -6,13 +6,16 @@ import { FC, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 const ErrorPage: FC =
-  Object.values(import.meta.globEager('/src/error.(tsx|ts|jsx|js)'))[0]?.default || (() => null);
+  Object.values(import.meta.globEager('@app/pages/500.(tsx|ts|jsx|js)'))[0]?.default ||
+  (() => null);
 
 const NotFoundPage: FC =
-  Object.values(import.meta.globEager('/src/404.(tsx|ts|jsx|js)'))[0]?.default || (() => null);
+  Object.values(import.meta.globEager('@app/pages/404.(tsx|ts|jsx|js)'))[0]?.default ||
+  (() => null);
 
 const LoadingPage: FC =
-  Object.values(import.meta.globEager('/src/loading.(tsx|ts|jsx|js)'))[0]?.default || (() => null);
+  Object.values(import.meta.globEager('@app/pages/_loading.(tsx|ts|jsx|js)'))[0]?.default ||
+  (() => null);
 
 export interface AppPageProps {
   initialProps: unknown;
