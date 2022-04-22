@@ -1,7 +1,7 @@
 import { type AppProps } from '@generator/types';
 import { Head } from '@generator/head';
 import styles from './app.module.css';
-import './index.css';
+import './app.css';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ Component, initialProps, preloadedData }: AppProps) {

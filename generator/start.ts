@@ -142,6 +142,8 @@ async function generate() {
     });
 
     await Promise.all(fileGeneratorPromises);
+
+    await fs.promises.rm(path.join(root, 'generator/lib'), { recursive: true, force: true });
   } catch (e: unknown) {
     console.error(e);
   }

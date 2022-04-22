@@ -1,8 +1,9 @@
-import { Link } from '@generator/link';
+import { Link } from '@generator/router';
 import { PageProps } from '@generator/types';
+import crypto from 'crypto';
 
 export function getStaticProps() {
-  return { foo: 'baz' };
+  return { foo: crypto.randomBytes(48).toString('hex') };
 }
 
 export default function About({ staticProps }: PageProps<ReturnType<typeof getStaticProps>>) {

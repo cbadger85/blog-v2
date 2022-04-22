@@ -1,4 +1,4 @@
-import { Link } from '@generator/link';
+import { Link } from '@generator/router';
 import { PageProps } from '@generator/types';
 
 export function getStaticProps() {
