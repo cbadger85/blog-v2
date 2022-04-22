@@ -1,7 +1,7 @@
-import { useQueryPageData } from 'components/PageDataCache/PageDataCache';
+import { useQueryPageData } from '@generator/components/PageDataCache';
 import { ComponentClass, ComponentType, FC, LazyExoticComponent } from 'react';
 import { useLocation } from 'react-router-dom';
-import { PageProps } from 'routes';
+import { PageProps } from '@generator/types';
 
 interface PageDataProps {
   component:

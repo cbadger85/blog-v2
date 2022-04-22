@@ -1,9 +1,9 @@
-/* eslint-disable no-console */
 import { Component, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
   children?: ReactNode;
   fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: unknown) => void;
 }
 
 interface ErrorBoundaryState {
@@ -17,17 +17,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   static getDerivedStateFromError(_error: Error) {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.log('eh?');
-    if (import.meta.env.DEV) {
-      console.error(error);
-      console.log(errorInfo);
-    }
+  componentDidCatch(error: Error, errorInfo: unknown) {
+    this.props.onError?.(error, errorInfo);
   }
 
   render() {

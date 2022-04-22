@@ -5,12 +5,12 @@ export const ERROR_PAGE = '/505' as const;
 
 export const routes: Record<string, RouteConfig> = {
   '/': {
-    component: lazy(() => import('./pages/Home')),
-    getStaticProps: () => import('./pages/Home').then((module) => module.getStaticProps()),
+    component: lazy(() => import('./pages')),
+    getStaticProps: () => import('./pages').then((module) => module.getStaticProps()),
   },
   '/about': {
-    component: lazy(() => import('./pages/About')),
-    getStaticProps: () => import('./pages/About').then((module) => module.getStaticProps()),
+    component: lazy(() => import('./pages/about')),
+    getStaticProps: () => import('./pages/about').then((module) => module.getStaticProps()),
   },
   [NOT_FOUND_PAGE]: {
     element: createElement('div', {}, 'Oops'),

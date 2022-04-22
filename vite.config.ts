@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
+        '@generator': path.resolve(__dirname, 'generator'),
+        '@app': path.resolve(__dirname, 'src'),
         '~': path.resolve(__dirname, 'src'),
       },
     },
@@ -36,8 +38,8 @@ export default defineConfig(({ mode }) => {
       return {
         ...baseConfig,
         build: {
-          outDir: 'build/server',
-          ssr: 'src/server.tsx',
+          outDir: 'generator/lib',
+          ssr: 'generator/server.tsx',
           rollupOptions: {
             output: {
               format: 'es',
@@ -49,7 +51,7 @@ export default defineConfig(({ mode }) => {
       return {
         ...baseConfig,
         build: {
-          outDir: 'build/client',
+          outDir: 'build',
         },
       };
   }

@@ -1,8 +1,13 @@
 import { StaticRouter } from 'react-router-dom/server.js';
-import { StrictMode } from 'react';
+import { FC, StrictMode } from 'react';
 import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
-import App from './App';
+import { App } from '@generator/components/App';
+import { AppProps } from './types';
+
+const CustomApp: FC<AppProps> | undefined = Object.values(
+  import.meta.globEager('@app/App.(tsx|ts|jsx|js)')
+)[0]?.default;
 
 interface PageData {
   preloadedData: unknown;
@@ -25,7 +30,11 @@ export function render(
     <StrictMode>
       <HelmetProvider context={helmetData}>
         <StaticRouter location={url}>
-          <App preloadedData={preloadedData} initialProps={initialProps} />
+          {CustomApp ? (
+            <CustomApp Component={App} initialProps={initialProps} preloadedData={preloadedData} />
+          ) : (
+            <App initialProps={initialProps} />
+          )}
         </StaticRouter>
       </HelmetProvider>
     </StrictMode>,
@@ -40,5 +49,10 @@ export function render(
   );
 }
 
-export { preloader } from './loaders';
-export { routes } from './routes';
+export const preloader =
+  Object.values(import.meta.globEager('@app/server.(tsx|ts|jsx|js)'))[0]?.preloader ||
+  function preloader() {
+    return {};
+  };
+
+export { routes } from '@generator/routes';

@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { noop } from 'utils';
+import { noop } from '@generator/utils';
 
 const PageDataCacheContext = createContext<{
   preload: (href: string) => void;
@@ -107,7 +107,7 @@ class PageDataNotFoundError extends Error {
 
 async function loadStaticProps(href: string): Promise<unknown> {
   return axios
-    .get(`${href === '/' ? 'home' : href}.json`)
+    .get(`${href === '/' ? 'index' : href}.json`)
     .then((res) => {
       const contentType = res.headers['content-type'];
 

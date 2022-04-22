@@ -5,16 +5,15 @@ import fs from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
-import { fileURLToPath } from 'url';
 import { createServer as createViteServer, build } from 'vite';
+import { RouteConfig } from '@generator/types';
 
 const readFileAsync = fs.promises.readFile;
 const writeFileAsync = fs.promises.writeFile;
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const root = process.cwd();
 
 async function devServer() {
   const port = process.env.SERVER_PORT || 3000;
@@ -35,28 +34,33 @@ async function devServer() {
     try {
       const url = req.originalUrl;
 
-      const template = await readFileAsync(path.resolve(__dirname, 'index.html'), 'utf8').then(
-        (file) => vite.transformIndexHtml(url, file)
+      const template = await readFileAsync(path.resolve(root, 'index.html'), 'utf8').then((file) =>
+        vite.transformIndexHtml(url, file)
       );
 
       const { render, preloader, routes } = await vite.ssrLoadModule(
-        path.resolve(__dirname, 'src/server.tsx')
+        path.resolve(root, 'generator/server.tsx')
+      );
+
+      const routesMap: Record<string, RouteConfig> = Object.fromEntries(
+        routes.map((route: RouteConfig) => [route.path, route])
       );
 
       if (url.endsWith('.json')) {
-        const jsonData = await getJsonDataLoaders(routes)[url]?.();
+        const pagePath = url === '/index.json' ? '/' : url.substring(0, url.length - 5);
+        const jsonData = await routesMap[pagePath]?.getStaticProps?.();
 
         if (jsonData) {
           res.send(jsonData);
           return;
         }
 
-        res.send({});
+        res.sendStatus(404);
         return;
       }
 
       const preloadedData = await preloader();
-      const initialProps = (await routes[url]?.getStaticProps()) || {};
+      const initialProps = await routesMap[url]?.getStaticProps?.();
 
       render(
         url,
@@ -94,38 +98,44 @@ async function devServer() {
 async function generate() {
   try {
     await build({ mode: 'build' });
-    const template = await readFileAsync(
-      path.resolve(__dirname, 'build/client/index.html'),
-      'utf8'
-    );
+
+    const template = await readFileAsync(path.resolve(root, 'build/index.html'), 'utf8');
 
     await build({ mode: 'ssr' });
 
-    const { preloader, routes } = await import(path.resolve(__dirname, 'build/server/server.js'));
+    const { preloader, routes } = await import(path.resolve(root, 'generator/lib/server.js'));
 
-    await Promise.all(
-      Object.entries<{ getStaticProps?: () => Promise<unknown> }>(routes).flatMap(
-        ([route, { getStaticProps = () => Promise.resolve({}) }]) => {
-          const routeSegments = route.split('/');
-          const name = `${routeSegments[routeSegments.length - 1] || 'index'}.html`;
+    const fileGeneratorPromises = (routes as RouteConfig[]).flatMap((route) => {
+      const htmlFile = (preloader() as Promise<unknown>)
+        .then((preloadedData) =>
+          route.getStaticProps?.().then((initialProps) => ({ initialProps, preloadedData }))
+        )
+        .then((pageData) =>
+          writeHtmlFile(
+            {
+              filepath: route.path === '/' ? 'index.html' : `${route.path.substring(1)}.html`,
+              path: route.path,
+            },
+            pageData || ({} as PageData),
+            template
+          )
+        )
+        .then((htmlFilePath) => console.log(path.relative(root, htmlFilePath)));
 
-          const jsonPath = `${route === '/' ? '/home' : route}.json`.substring(1);
-          const jsonFilePath = path.resolve(__dirname, 'build/client', jsonPath);
-          const jsonFile = getStaticProps()
-            .then((props) => writeFileAsync(jsonFilePath, JSON.stringify(props)))
-            .then(() => console.log(path.relative(__dirname, jsonFilePath)));
+      const jsonFilePath = path.resolve(
+        root,
+        'build',
+        route.path === '/' ? 'index.json' : `${route.path.substring(1)}.json`
+      );
+      const jsonFile = route
+        .getStaticProps?.()
+        .then((props) => writeFileAsync(jsonFilePath, JSON.stringify(props)))
+        .then(() => console.log(path.relative(root, jsonFilePath)));
 
-          const htmlFile = (preloader() as Promise<unknown>)
-            .then((preloadedData) =>
-              getStaticProps().then((initialProps) => ({ initialProps, preloadedData }))
-            )
-            .then((pageData) => writeHtmlFile({ name, route }, pageData, template))
-            .then((htmlFilePath) => console.log(path.relative(__dirname, htmlFilePath)));
+      return [htmlFile, jsonFile];
+    });
 
-          return [jsonFile, htmlFile];
-        }
-      )
-    );
+    await Promise.all(fileGeneratorPromises);
   } catch (e: unknown) {
     console.error(e);
   }
@@ -137,8 +147,8 @@ interface PageData {
 }
 
 interface PageInfo {
-  route: string;
-  name: string;
+  path: string;
+  filepath: string;
 }
 
 async function writeHtmlFile(
@@ -146,13 +156,13 @@ async function writeHtmlFile(
   { preloadedData, initialProps }: PageData,
   template: string
 ): Promise<string> {
-  const { render } = await import(path.resolve(__dirname, 'build/server/server.js'));
+  const { render } = await import(path.resolve(root, 'generator/lib/server.js'));
   return new Promise((resolve, reject) => {
-    const htmlFilePath = path.resolve(__dirname, 'build/client', pageInfo.name);
+    const htmlFilePath = path.resolve(root, 'build', pageInfo.filepath);
     const htmlWriteStream = fs.createWriteStream(htmlFilePath);
 
     render(
-      pageInfo.route,
+      pageInfo.path,
       { preloadedData, initialProps },
       ({ pipe }: PipeableStream, helmetData: HelmetServerState, err: unknown) => {
         if (err !== null) {
@@ -203,17 +213,6 @@ function hydrateTemplate(
     .replace('<!--ssr-meta-->', helmetData.meta.toString())
     .replace('<!--ssr-link-->', helmetData.link.toString())
     .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
-}
-
-type RouteConfig = Record<string, { getStaticProps?: () => Promise<unknown> }>;
-
-function getJsonDataLoaders(route: RouteConfig) {
-  return Object.fromEntries(
-    Object.entries(route).map(([url, { getStaticProps }]) => [
-      `${url === '/' ? '/home' : url}.json`,
-      getStaticProps,
-    ])
-  );
 }
 
 const start = process.argv.includes('generate') ? generate : devServer;

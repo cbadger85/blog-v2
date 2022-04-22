@@ -1,5 +1,5 @@
-import { Link } from 'components/Link';
-import { PageProps } from 'routes';
+import { Link } from '@generator/link';
+import { PageProps } from '@generator/types';
 
 export function getStaticProps() {
   return { foo: 'bar' };

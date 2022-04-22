@@ -1,8 +1,8 @@
-import { usePreload } from 'components/PageDataCache/PageDataCache';
+import { usePreload } from '@generator/components/PageDataCache';
 import { forwardRef, HTMLAttributeAnchorTarget, ReactNode } from 'react';
 import { To, useHref, useLinkClickHandler } from 'react-router-dom';
 
-interface LinkProps {
+export interface LinkProps {
   to: To;
   replace?: boolean;
   target?: HTMLAttributeAnchorTarget;

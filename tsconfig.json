@@ -16,12 +16,14 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "~/*": ["./src/*"]
+      "@generator/*": ["./generator/*"],
+      "@app/*": ["src/*"],
+      "~/*": ["src/*"]
     },
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "types": ["vitest/globals", "vite/client"],
     "plugins": [{ "name": "typescript-plugin-css-modules" }],
     "noUnusedLocals": false
-  },
-  "include": ["./src", "custom.d.ts", "global.d.ts", "./setupTests.ts"]
+  }
+  // "include": ["./src", "custom.d.ts", "global.d.ts", "./setupTests.ts", "./generator"]
 }
