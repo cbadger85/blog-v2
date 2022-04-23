@@ -5,8 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
+import { matchRoutes } from 'react-router-dom';
 import { createServer as createViteServer, build } from 'vite';
-import { RouteConfig } from '@generator/types';
+import { RouteConfig } from './types';
 
 const readFileAsync = fs.promises.readFile;
 const writeFileAsync = fs.promises.writeFile;
@@ -47,8 +48,16 @@ async function devServer() {
       );
 
       if (url.endsWith('.json')) {
-        const pagePath = url === '/index.json' ? '/' : url.substring(0, url.length - 5);
-        const jsonData = await routesMap[pagePath]?.getStaticProps?.();
+        // TODO
+
+        console.log(matchRoutes(routes, url.replace('/index.json', '')));
+
+        const { route } = matchRoutes(routes, url.replace('/index.json', ''))?.[0] || {};
+
+        const jsonData = await (route as RouteConfig | undefined)?.getStaticProps?.();
+
+        // const pagePath = url === '/index.json' ? '/' : url.substring(0, url.length - 5);
+        // const jsonData = await routesMap[pagePath]?.getStaticProps?.();
 
         if (jsonData) {
           res.send(jsonData);
@@ -115,7 +124,7 @@ async function generate() {
         .then((pageData) =>
           writeHtmlFile(
             {
-              filepath: route.path === '/' ? 'index.html' : `${route.path.substring(1)}.html`,
+              filepath: getFilenameFromSourcepath(route.sourcepath, {}, '.html'),
               path: route.path,
             },
             pageData || ({} as PageData),
@@ -127,7 +136,7 @@ async function generate() {
       const jsonFilePath = path.resolve(
         root,
         'build',
-        route.path === '/' ? 'index.json' : `${route.path.substring(1)}.json`
+        getFilenameFromSourcepath(route.sourcepath, {}, '.json')
       );
       const jsonFile = createDir(jsonFilePath)
         .then(() => route.getStaticProps?.())
@@ -234,6 +243,30 @@ function hydrateTemplate(
     .replace('<!--ssr-meta-->', helmetData.meta.toString())
     .replace('<!--ssr-link-->', helmetData.link.toString())
     .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
+}
+
+function getFilenameFromSourcepath(
+  sourcepath: string,
+  params: Record<string, string | string[]>,
+  ext = ''
+): string {
+  const relativePath =
+    Object.entries(params).reduce(
+      (pathname, [key, param]) => {
+        if (Array.isArray(param)) {
+          return pathname.replace(`[...${key}]`, param.join('/'));
+        }
+        return pathname.replace(`[${key}]`, param);
+      },
+      sourcepath
+        .replace(/\.(tsx|ts|jsx|js)/, '')
+        .replace(/^(.*?)src\/pages/, '')
+        .replace(/\/index$/, '')
+    ) + `/index${ext}`;
+
+  console.log(path.join(root, 'build', relativePath));
+
+  return path.join(root, 'build', relativePath);
 }
 
 const start = process.argv.includes('generate') ? generate : devServer;

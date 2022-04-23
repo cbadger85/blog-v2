@@ -13,6 +13,7 @@ export interface PageProps<T> {
 
 export interface RouteConfig {
   path: string;
+  sourcepath: string;
   component: LazyExoticComponent<ComponentType<PageProps<unknown>>>;
   getStaticProps?: () => Promise<unknown>;
 }

@@ -107,7 +107,7 @@ class PageDataNotFoundError extends Error {
 
 async function loadStaticProps(href: string): Promise<unknown> {
   return axios
-    .get(`${href === '/' ? 'index' : href}.json`)
+    .get(`${href === '/' ? '' : href}/index.json`)
     .then((res) => {
       const contentType = res.headers['content-type'];
 

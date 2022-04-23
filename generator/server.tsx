@@ -3,7 +3,7 @@ import { FC, StrictMode } from 'react';
 import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
 import { App } from '@generator/components/App';
-import { AppProps } from './types';
+import { AppProps } from '@generator/types';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
   import.meta.globEager('@app/app.(tsx|ts|jsx|js)')

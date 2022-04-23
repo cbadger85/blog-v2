@@ -55,7 +55,8 @@
     "@typescript-eslint/no-use-before-define": ["error", "nofunc"],
     "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }],
     "react/destructuring-assignment": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "prefer-template": "off"
   },
   "settings": {
     "import/resolver": {
