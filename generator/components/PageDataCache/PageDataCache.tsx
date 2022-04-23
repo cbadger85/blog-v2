@@ -11,8 +11,8 @@ const PageDataCacheContext = createContext<{
   queryPageData: noop,
 });
 
-export function useQueryPageData(href: string): unknown {
-  return useContext(PageDataCacheContext).queryPageData(href);
+export function useQueryPageData(): (href: string) => unknown {
+  return useContext(PageDataCacheContext).queryPageData;
 }
 
 export const usePreload = () => useContext(PageDataCacheContext).preload;
@@ -122,6 +122,6 @@ async function loadStaticProps(href: string): Promise<unknown> {
         // eslint-disable-next-line no-console
         console.error(e);
       }
-      throw new PageDataNotFoundError(href);
+      return {};
     });
 }

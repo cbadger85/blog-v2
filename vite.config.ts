@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
       return {
         ...baseConfig,
         build: {
-          outDir: 'generator/lib',
+          outDir: 'generator/_lib',
           ssr: 'generator/server.tsx',
           rollupOptions: {
             output: {

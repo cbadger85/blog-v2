@@ -97,13 +97,15 @@ async function devServer() {
 
 async function generate() {
   try {
+    await clean();
+
     await build({ mode: 'build' });
 
     const template = await readFileAsync(path.resolve(root, 'build/index.html'), 'utf8');
 
     await build({ mode: 'ssr' });
 
-    const { preloader, routes } = await import(path.resolve(root, 'generator/lib/server.js'));
+    const { preloader, routes } = await import(path.resolve(root, 'generator/_lib/server.js'));
 
     const fileGeneratorPromises = (routes as RouteConfig[]).flatMap((route) => {
       const htmlFile = (preloader() as Promise<unknown>)
@@ -127,8 +129,8 @@ async function generate() {
         'build',
         route.path === '/' ? 'index.json' : `${route.path.substring(1)}.json`
       );
-      const jsonFile = route
-        .getStaticProps?.()
+      const jsonFile = createDir(jsonFilePath)
+        .then(() => route.getStaticProps?.())
         .then((props) => {
           if (props) {
             return writeFileAsync(jsonFilePath, JSON.stringify(props)).then(() => true);
@@ -142,11 +144,13 @@ async function generate() {
     });
 
     await Promise.all(fileGeneratorPromises);
-
-    await fs.promises.rm(path.join(root, 'generator/lib'), { recursive: true, force: true });
   } catch (e: unknown) {
     console.error(e);
   }
+}
+
+async function clean() {
+  await fs.promises.rm(path.join(root, 'generator/_lib'), { recursive: true, force: true });
 }
 
 interface PageData {
@@ -164,9 +168,12 @@ async function writeHtmlFile(
   { preloadedData, initialProps }: PageData,
   template: string
 ): Promise<string> {
-  const { render } = await import(path.resolve(root, 'generator/lib/server.js'));
+  const htmlFilePath = path.resolve(root, 'build', pageInfo.filepath);
+  await createDir(htmlFilePath);
+
+  const { render } = await import(path.resolve(root, 'generator/_lib/server.js'));
+
   return new Promise((resolve, reject) => {
-    const htmlFilePath = path.resolve(root, 'build', pageInfo.filepath);
     const htmlWriteStream = fs.createWriteStream(htmlFilePath);
 
     render(
@@ -197,6 +204,12 @@ async function writeHtmlFile(
       resolve(htmlFilePath);
     });
   });
+}
+
+async function createDir(filepath: string) {
+  const dirname = path.dirname(filepath);
+
+  await fs.promises.mkdir(dirname, { recursive: true }).catch((e) => console.error(e));
 }
 
 interface TemplateData {

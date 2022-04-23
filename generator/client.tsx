@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from '@generator/components/App';
 import { AppProps } from '@generator/types';
+import { PageTransitionProvider } from '@generator/components/PageTransitionProvider/PageTransitionProvider';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
   import.meta.globEager('@app/app.(tsx|ts|jsx|js)')
@@ -21,15 +22,17 @@ async function main() {
       <StrictMode>
         <HelmetProvider>
           <BrowserRouter>
-            {CustomApp ? (
-              <CustomApp
-                Component={App}
-                initialProps={initialProps}
-                preloadedData={preloadedData}
-              />
-            ) : (
-              <App initialProps={initialProps} />
-            )}
+            <PageTransitionProvider>
+              {CustomApp ? (
+                <CustomApp
+                  Component={App}
+                  initialProps={initialProps}
+                  preloadedData={preloadedData}
+                />
+              ) : (
+                <App initialProps={initialProps} />
+              )}
+            </PageTransitionProvider>
           </BrowserRouter>
         </HelmetProvider>
       </StrictMode>

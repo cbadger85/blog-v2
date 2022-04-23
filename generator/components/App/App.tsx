@@ -13,10 +13,6 @@ const NotFoundPage: FC =
   Object.values(import.meta.globEager('@app/pages/404.(tsx|ts|jsx|js)'))[0]?.default ||
   (() => null);
 
-const LoadingPage: FC =
-  Object.values(import.meta.globEager('@app/pages/_loading.(tsx|ts|jsx|js)'))[0]?.default ||
-  (() => null);
-
 export interface AppPageProps {
   initialProps: unknown;
   onError?: (error: Error, errorInfo: unknown) => void;
@@ -25,7 +21,7 @@ export interface AppPageProps {
 export function App({ initialProps = {}, onError }: AppPageProps) {
   return (
     <PageDataCache initialProps={initialProps}>
-      <Suspense fallback={<LoadingPage />}>
+      <Suspense>
         <ErrorBoundary fallback={<ErrorPage />} onError={onError}>
           <Routes>
             {routes.map(({ path, component }) => (
