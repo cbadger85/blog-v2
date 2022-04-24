@@ -117,11 +117,7 @@ async function loadStaticProps(href: string): Promise<unknown> {
 
       return res.data;
     })
-    .catch((e) => {
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      }
+    .catch(() => {
       return {};
     });
 }

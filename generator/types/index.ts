@@ -15,5 +15,6 @@ export interface RouteConfig {
   path: string;
   sourcepath: string;
   component: LazyExoticComponent<ComponentType<PageProps<unknown>>>;
-  getStaticProps?: () => Promise<unknown>;
+  getStaticProps?: (ctx: { params: Record<string, string | string[]> }) => Promise<unknown>;
+  getStaticPaths?: () => Promise<Record<string, string | string[]>[]>;
 }

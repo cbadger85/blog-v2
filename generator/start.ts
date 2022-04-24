@@ -5,7 +5,6 @@ import fs from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
-import { matchRoutes } from 'react-router-dom';
 import { createServer as createViteServer, build } from 'vite';
 import { RouteConfig } from './types';
 
@@ -43,24 +42,15 @@ async function devServer() {
         path.resolve(root, 'generator/server.tsx')
       );
 
-      const routesMap: Record<string, RouteConfig> = Object.fromEntries(
-        routes.map((route: RouteConfig) => [route.path, route])
-      );
+      const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
 
-      if (url.endsWith('.json')) {
-        // TODO
+      const initialProps = await urlToGetStaticProps[
+        url === '/index.json' ? '/' : url.replace('/index.json', '')
+      ]?.();
 
-        console.log(matchRoutes(routes, url.replace('/index.json', '')));
-
-        const { route } = matchRoutes(routes, url.replace('/index.json', ''))?.[0] || {};
-
-        const jsonData = await (route as RouteConfig | undefined)?.getStaticProps?.();
-
-        // const pagePath = url === '/index.json' ? '/' : url.substring(0, url.length - 5);
-        // const jsonData = await routesMap[pagePath]?.getStaticProps?.();
-
-        if (jsonData) {
-          res.send(jsonData);
+      if (url.endsWith('index.json')) {
+        if (initialProps) {
+          res.send(initialProps);
           return;
         }
 
@@ -69,7 +59,6 @@ async function devServer() {
       }
 
       const preloadedData = await preloader();
-      const initialProps = await routesMap[url]?.getStaticProps?.();
 
       render(
         url,
@@ -116,45 +105,50 @@ async function generate() {
 
     const { preloader, routes } = await import(path.resolve(root, 'generator/_lib/server.js'));
 
-    const fileGeneratorPromises = (routes as RouteConfig[]).flatMap((route) => {
-      const htmlFile = (preloader() as Promise<unknown>)
-        .then((preloadedData) =>
-          route.getStaticProps?.().then((initialProps) => ({ initialProps, preloadedData }))
-        )
-        .then((pageData) =>
-          writeHtmlFile(
-            {
-              filepath: getFilenameFromSourcepath(route.sourcepath, {}, '.html'),
-              path: route.path,
-            },
-            pageData || ({} as PageData),
-            template
-          )
-        )
-        .then((htmlFilePath) => console.log(path.relative(root, htmlFilePath)));
+    const preloadedData = await preloader();
 
-      const jsonFilePath = path.resolve(
-        root,
-        'build',
-        getFilenameFromSourcepath(route.sourcepath, {}, '.json')
-      );
-      const jsonFile = createDir(jsonFilePath)
-        .then(() => route.getStaticProps?.())
-        .then((props) => {
-          if (props) {
-            return writeFileAsync(jsonFilePath, JSON.stringify(props)).then(() => true);
-          }
+    const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
 
-          return Promise.resolve(false);
-        })
-        .then((isWritten) => isWritten && console.log(path.relative(root, jsonFilePath)));
+    await Promise.all(
+      Object.entries(urlToGetStaticProps).map(async ([url, getStaticProps]) => {
+        const staticProps = await getStaticProps();
 
-      return [htmlFile, jsonFile];
-    });
-
-    await Promise.all(fileGeneratorPromises);
+        await writePage(url, { preloadedData, initialProps: staticProps }, template);
+      })
+    );
   } catch (e: unknown) {
     console.error(e);
+  }
+}
+
+async function writePage(url: string, pageData: PageData, template: string): Promise<void> {
+  const filepath = path.join(root, 'build', url);
+
+  const htmlFilepath = ['/404', '/505'].includes(url)
+    ? `${filepath}.html`
+    : path.join(filepath, 'index.html');
+
+  const htmlFile = writeHtmlFile(
+    {
+      filepath: htmlFilepath,
+      path: url,
+    },
+    pageData,
+    template
+  ).then(() => console.log(path.relative(root, htmlFilepath)));
+
+  if (!pageData.initialProps) {
+    await htmlFile;
+  } else {
+    const jsonFilepath = path.join(filepath, 'index.json');
+
+    const jsonFile = createDir(jsonFilepath).then(() =>
+      writeFileAsync(jsonFilepath, JSON.stringify(pageData.initialProps || {})).then(() =>
+        console.log(path.relative(root, jsonFilepath))
+      )
+    );
+
+    await Promise.all([htmlFile, jsonFile]);
   }
 }
 
@@ -176,14 +170,13 @@ async function writeHtmlFile(
   pageInfo: PageInfo,
   { preloadedData, initialProps }: PageData,
   template: string
-): Promise<string> {
-  const htmlFilePath = path.resolve(root, 'build', pageInfo.filepath);
-  await createDir(htmlFilePath);
+): Promise<void> {
+  await createDir(pageInfo.filepath);
 
   const { render } = await import(path.resolve(root, 'generator/_lib/server.js'));
 
   return new Promise((resolve, reject) => {
-    const htmlWriteStream = fs.createWriteStream(htmlFilePath);
+    const htmlWriteStream = fs.createWriteStream(pageInfo.filepath);
 
     render(
       pageInfo.path,
@@ -210,7 +203,7 @@ async function writeHtmlFile(
     });
 
     htmlWriteStream.on('finish', () => {
-      resolve(htmlFilePath);
+      resolve();
     });
   });
 }
@@ -245,28 +238,50 @@ function hydrateTemplate(
     .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
 }
 
-function getFilenameFromSourcepath(
+function getUrlFromSourcepath(
   sourcepath: string,
-  params: Record<string, string | string[]>,
-  ext = ''
+  params: Record<string, string | string[]>
 ): string {
-  const relativePath =
+  return (
     Object.entries(params).reduce(
-      (pathname, [key, param]) => {
+      (url, [key, param]) => {
         if (Array.isArray(param)) {
-          return pathname.replace(`[...${key}]`, param.join('/'));
+          return url.replace(`[...${key}]`, param.join('/'));
         }
-        return pathname.replace(`[${key}]`, param);
+        return url.replace(`[${key}]`, param);
       },
       sourcepath
         .replace(/\.(tsx|ts|jsx|js)/, '')
         .replace(/^(.*?)src\/pages/, '')
         .replace(/\/index$/, '')
-    ) + `/index${ext}`;
+    ) || '/'
+  );
+}
 
-  console.log(path.join(root, 'build', relativePath));
+async function getUrlToGetStaticProps(
+  routes: RouteConfig[]
+): Promise<Record<string, () => Promise<unknown>>> {
+  const entriesLists: [string, () => Promise<unknown>][][] = await Promise.all(
+    routes.map(async (route) => {
+      const paramsList = (await route.getStaticPaths?.()) || [];
 
-  return path.join(root, 'build', relativePath);
+      if (paramsList.length) {
+        return paramsList.map<[string, () => Promise<unknown>]>((params) => [
+          getUrlFromSourcepath(route.sourcepath, params),
+          () => route.getStaticProps?.({ params }) || Promise.resolve({}),
+        ]);
+      }
+
+      return [
+        [
+          getUrlFromSourcepath(route.sourcepath, {}),
+          () => route.getStaticProps?.({ params: {} }) || Promise.resolve({}),
+        ] as [string, () => Promise<unknown>],
+      ];
+    })
+  );
+
+  return Object.fromEntries(entriesLists.flat());
 }
 
 const start = process.argv.includes('generate') ? generate : devServer;
