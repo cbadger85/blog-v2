@@ -7,14 +7,20 @@ export interface AppProps {
   preloadedData?: unknown;
 }
 
-export interface PageProps<T> {
-  staticProps: T;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PagePropsFromStaticProps<T extends (...args: any[]) => any> = ReturnType<T>;
 
 export interface RouteConfig {
   path: string;
   sourcepath: string;
-  component: LazyExoticComponent<ComponentType<PageProps<unknown>>>;
-  getStaticProps?: (ctx: { params: Record<string, string | string[]> }) => Promise<unknown>;
+  component: LazyExoticComponent<ComponentType<unknown>>;
+  getStaticProps?: (ctx: StaticPropsContext) => Promise<unknown>;
   getStaticPaths?: () => Promise<Record<string, string | string[]>[]>;
+}
+
+export interface StaticPropsContext<
+  T extends Record<string, string | string[]> = Record<string, string | string[]>
+> {
+  params: T;
+  pathname: string;
 }

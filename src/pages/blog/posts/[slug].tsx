@@ -1,4 +1,4 @@
-import { PageProps } from '@generator/types';
+import { PagePropsFromStaticProps, StaticPropsContext } from '@generator/types';
 
 export function getStaticPaths() {
   return [
@@ -9,10 +9,10 @@ export function getStaticPaths() {
   ];
 }
 
-export function getStaticProps(ctx: { params: Record<string, string | string[]> }) {
+export function getStaticProps(ctx: StaticPropsContext) {
   return { slug: ctx?.params.slug };
 }
 
-export default function Post(props: PageProps<{ slug: string }>) {
-  return <div>{props.staticProps.slug}</div>;
+export default function Post({ slug }: PagePropsFromStaticProps<typeof getStaticProps>) {
+  return <div>{slug}</div>;
 }

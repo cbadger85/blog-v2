@@ -99,12 +99,6 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
   return <PageDataCacheContext.Provider value={context}>{children}</PageDataCacheContext.Provider>;
 }
 
-class PageDataNotFoundError extends Error {
-  constructor(private href: string) {
-    super(`page data not found at ${href}`);
-  }
-}
-
 async function loadStaticProps(href: string): Promise<unknown> {
   return axios
     .get(`${href === '/' ? '' : href}/index.json`)
@@ -112,7 +106,7 @@ async function loadStaticProps(href: string): Promise<unknown> {
       const contentType = res.headers['content-type'];
 
       if (!contentType || !contentType.includes('application/json')) {
-        throw new PageDataNotFoundError(href);
+        return {};
       }
 
       return res.data;

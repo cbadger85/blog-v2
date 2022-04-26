@@ -88,7 +88,7 @@ export async function getStaticPropsFromUrl(
               .then((paramsList) =>
                 paramsList.map<[string, () => Promise<unknown>]>((params) => [
                   getUrlFromSourcepath(route.sourcepath, params),
-                  () => route.getStaticProps?.({ params }) || Promise.resolve({}),
+                  () => route.getStaticProps?.({ params, pathname: url }) || Promise.resolve({}),
                 ])
               ) || Promise.resolve([])
         )

@@ -1,4 +1,4 @@
-import { RouteConfig } from '@generator/types';
+import { RouteConfig, StaticPropsContext } from '@generator/types';
 import { lazy } from 'react';
 import { getPathFromSourcepath } from '@generator/utils';
 
@@ -14,7 +14,7 @@ export const routes: RouteConfig[] = Object.entries(ROUTES).map(([pathname, modu
 
       return getStaticPaths?.();
     },
-    getStaticProps: async (ctx: { params: Record<string, string | string[]> }) => {
+    getStaticProps: async (ctx: StaticPropsContext) => {
       const { getStaticProps } = await module();
 
       return getStaticProps?.(ctx);

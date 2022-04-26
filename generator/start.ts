@@ -1,15 +1,19 @@
 /* eslint-disable no-console */
 import dotenv from 'dotenv';
 import express from 'express';
-import fs from 'fs';
+import { createWriteStream, promises as fsPromises } from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
 import { createServer as createViteServer, build } from 'vite';
 import { RouteConfig } from './types';
 
-const readFileAsync = fs.promises.readFile;
-const writeFileAsync = fs.promises.writeFile;
+const {
+  readFile: readFileAsync,
+  writeFile: writeFileAsync,
+  rm: rmAsync,
+  mkdir: mkdirAsync,
+} = fsPromises;
 
 dotenv.config();
 
@@ -101,7 +105,7 @@ async function generate() {
 
     const template = await readFileAsync(path.resolve(root, 'build/index.html'), 'utf8');
 
-    await build({ mode: 'ssr' });
+    await build({ mode: 'ssr' }); // look into using mkdtemp
 
     const { preloader, routes } = await import(path.resolve(root, 'generator/_lib/server.js'));
 
@@ -153,7 +157,7 @@ async function writePage(url: string, pageData: PageData, template: string): Pro
 }
 
 async function clean() {
-  await fs.promises.rm(path.join(root, 'generator/_lib'), { recursive: true, force: true });
+  await rmAsync(path.join(root, 'generator/_lib'), { recursive: true, force: true });
 }
 
 interface PageData {
@@ -176,7 +180,7 @@ async function writeHtmlFile(
   const { render } = await import(path.resolve(root, 'generator/_lib/server.js'));
 
   return new Promise((resolve, reject) => {
-    const htmlWriteStream = fs.createWriteStream(pageInfo.filepath);
+    const htmlWriteStream = createWriteStream(pageInfo.filepath);
 
     render(
       pageInfo.path,
@@ -211,7 +215,7 @@ async function writeHtmlFile(
 async function createDir(filepath: string) {
   const dirname = path.dirname(filepath);
 
-  await fs.promises.mkdir(dirname, { recursive: true }).catch((e) => console.error(e));
+  await mkdirAsync(dirname, { recursive: true }).catch((e) => console.error(e));
 }
 
 interface TemplateData {
@@ -266,17 +270,17 @@ async function getUrlToGetStaticProps(
       const paramsList = (await route.getStaticPaths?.()) || [];
 
       if (paramsList.length) {
-        return paramsList.map<[string, () => Promise<unknown>]>((params) => [
-          getUrlFromSourcepath(route.sourcepath, params),
-          () => route.getStaticProps?.({ params }) || Promise.resolve({}),
-        ]);
+        return paramsList.map<[string, () => Promise<unknown>]>((params) => {
+          const pathname = getUrlFromSourcepath(route.sourcepath, params);
+          return [
+            pathname,
+            () => route.getStaticProps?.({ params, pathname }) || Promise.resolve({}),
+          ];
+        });
       }
-
+      const pathname = getUrlFromSourcepath(route.sourcepath, {});
       return [
-        [
-          getUrlFromSourcepath(route.sourcepath, {}),
-          () => route.getStaticProps?.({ params: {} }) || Promise.resolve({}),
-        ] as [string, () => Promise<unknown>],
+        [pathname, () => route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({})],
       ];
     })
   );
