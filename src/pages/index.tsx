@@ -11,7 +11,7 @@ export default function Home(props: PagePropsFromStaticProps<typeof getStaticPro
       <h1>HOME</h1>
       <Link to="/about">about</Link>
       <div>{JSON.stringify(props, null, 2)}</div>
-      <Link to="/blog/posts">posts</Link>
+      <Link to="/posts">posts</Link>
     </div>
   );
 }

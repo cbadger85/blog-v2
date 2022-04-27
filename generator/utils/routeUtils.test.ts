@@ -58,46 +58,54 @@ describe.only('matchRoute', () => {
     component: vi.fn() as never,
     path: '/',
     sourcepath: '../src/pages/index.tsx',
+    loadComponent: vi.fn(),
   };
   const config2: RouteConfig = {
     component: vi.fn() as never,
     path: '/index',
     sourcepath: '../src/pages/index/index.jsx',
+    loadComponent: vi.fn(),
   };
   const config3: RouteConfig = {
     component: vi.fn() as never,
     path: '/',
     sourcepath: 'othergiberish/src/pages/index.tsx',
+    loadComponent: vi.fn(),
   };
   const config4: RouteConfig = {
     component: vi.fn() as never,
     path: '/blog/posts/:slug',
     sourcepath: 'src/pages/blog/posts/[slug].js',
     getStaticPaths: () => Promise.resolve([{ slug: 'first-post' }, { slug: 'second-post' }]),
+    loadComponent: vi.fn(),
   };
   const config5: RouteConfig = {
     component: vi.fn() as never,
     path: '/categories/*',
     sourcepath: 'src/pages/categories/[...category].ts',
     getStaticPaths: () => Promise.resolve([{ category: ['foo', 'bar'] }]),
+    loadComponent: vi.fn(),
   };
   const config6: RouteConfig = {
     component: vi.fn() as never,
     path: '/blog/posts/:slug/comments',
     sourcepath: 'src/pages/blog/posts/[slug]/comments.jsx',
     getStaticPaths: () => Promise.resolve([{ slug: 'first-post' }, { slug: 'second-post' }]),
+    loadComponent: vi.fn(),
   };
   const config7: RouteConfig = {
     component: vi.fn() as never,
     path: '/categories/*/baz',
     sourcepath: 'src/pages/categories/[...category]/baz.ts',
     getStaticPaths: () => Promise.resolve([{ category: ['foo', 'bar'] }]),
+    loadComponent: vi.fn(),
   };
   const config8: RouteConfig = {
     component: vi.fn() as never,
     path: '/pictures/:date/tags/*',
     sourcepath: 'src/pages/pictures/[date]/tags/[...tag].tsx',
     getStaticPaths: () => Promise.resolve([{ date: '2022-04-20', tag: ['foo', 'bar'] }]),
+    loadComponent: vi.fn(),
   };
   const parameters: [RouteConfig[], string, RouteConfig | null][] = [
     [[config1, config2, config4, config5], '/', config1],

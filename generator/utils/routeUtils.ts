@@ -1,4 +1,5 @@
 import { RouteConfig } from '@generator/types';
+import { matchRoutes } from 'react-router-dom';
 
 export function getPathFromSourcepath(sourcePath: string): string {
   const path = sourcePath
@@ -97,4 +98,13 @@ export async function getStaticPropsFromUrl(
   );
 
   return pathnameToRoute[url]() || null;
+}
+
+export function loadModuleFromPathname(
+  routes: RouteConfig[],
+  pathname: string
+): Promise<Record<string, unknown>> {
+  const firstMatch = matchRoutes(routes, pathname)?.[0];
+
+  return (firstMatch?.route as RouteConfig)?.loadComponent();
 }

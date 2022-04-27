@@ -1,4 +1,6 @@
 import { usePreload } from '@generator/components/PageDataCache';
+import { routes } from '@generator/routes';
+import { loadModuleFromPathname } from '@generator/utils/routeUtils';
 import { forwardRef, HTMLAttributeAnchorTarget, ReactNode } from 'react';
 import { To, useHref, useLinkClickHandler } from 'react-router-dom';
 import { usePageTransition } from '../PageTransitionProvider/PageTransitionProvider';
@@ -30,6 +32,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         }}
         onMouseEnter={() => {
           preload(href);
+          loadModuleFromPathname(routes, href);
         }}
       >
         {children}

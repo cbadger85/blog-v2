@@ -4,11 +4,12 @@ import { getPathFromSourcepath } from '@generator/utils';
 
 const ROUTES = import.meta.glob('@app/pages/**/([a-z[]*|404).(tsx|ts|jsx|js)');
 
-export const routes: RouteConfig[] = Object.entries(ROUTES).map(([pathname, module]) => {
+export const routes: RouteConfig[] = Object.entries(ROUTES).map(([sourcepath, module]) => {
   return {
-    path: getPathFromSourcepath(pathname),
-    sourcepath: pathname,
-    component: lazy(module as never),
+    path: getPathFromSourcepath(sourcepath),
+    sourcepath,
+    loadComponent: module,
+    component: lazy(() => module().then((m) => ({ default: m.default }))),
     getStaticPaths: async () => {
       const { getStaticPaths } = await module();
 

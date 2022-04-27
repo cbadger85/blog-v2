@@ -14,6 +14,7 @@ export interface RouteConfig {
   path: string;
   sourcepath: string;
   component: LazyExoticComponent<ComponentType<unknown>>;
+  loadComponent: () => Promise<Record<string, unknown>>;
   getStaticProps?: (ctx: StaticPropsContext) => Promise<unknown>;
   getStaticPaths?: () => Promise<Record<string, string | string[]>[]>;
 }
