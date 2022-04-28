@@ -6,10 +6,10 @@ export default function Posts() {
       <h1>List of Posts</h1>
       <ul>
         <li>
-          <Link to="/blog/posts/first-post">First Post</Link>
+          <Link to="/posts/first-post">First Post</Link>
         </li>
         <li>
-          <Link to="/blog/posts/second-post">Second Post</Link>
+          <Link to="/posts/second-post">Second Post</Link>
         </li>
       </ul>
     </div>
