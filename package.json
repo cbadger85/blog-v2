@@ -10,7 +10,7 @@
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "serve": "vite preview --port 3000",
-    "start": "ts-node --esm generator/start.ts -P tsconfig.json",
+    "start": "node --no-warnings --loader ./loader.js generator/start.ts",
     "test": "vitest --mode test",
     "test:coverage": "vitest run --mode test --coverage",
     "typecheck": "tsc"
@@ -51,6 +51,7 @@
     "jsdom": "^19.0.0",
     "prettier": "^2.6.2",
     "ts-node": "^10.7.0",
+    "tsconfig-paths": "^3.14.1",
     "typescript": "^4.6.3",
     "typescript-plugin-css-modules": "^3.4.0",
     "vite": "^2.9.5",

@@ -39,7 +39,8 @@
           "**/*.spec.{ts,tsx}",
           "setupTests.ts",
           "vite.config.ts",
-          "generator/start.ts"
+          "generator/start.ts",
+          "loader.js"
         ]
       }
     ],

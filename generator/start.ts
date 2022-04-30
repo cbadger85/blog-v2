@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
+import { getUrlToGetStaticProps } from '@generator/utils';
 import dotenv from 'dotenv';
 import express from 'express';
 import { createWriteStream, promises as fsPromises } from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
-import { createServer as createViteServer, build } from 'vite';
-import { RouteConfig } from './types';
+import { build, createServer as createViteServer } from 'vite';
 
 const {
   readFile: readFileAsync,
@@ -43,7 +43,7 @@ async function devServer() {
       );
 
       const { render, preloader, routes } = await vite.ssrLoadModule(
-        path.resolve(root, 'generator/server.tsx')
+        path.resolve(root, 'generator/app/server.tsx')
       );
 
       const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
@@ -240,52 +240,6 @@ function hydrateTemplate(
     .replace('<!--ssr-meta-->', helmetData.meta.toString())
     .replace('<!--ssr-link-->', helmetData.link.toString())
     .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
-}
-
-function getUrlFromSourcepath(
-  sourcepath: string,
-  params: Record<string, string | string[]>
-): string {
-  return (
-    Object.entries(params).reduce(
-      (url, [key, param]) => {
-        if (Array.isArray(param)) {
-          return url.replace(`[...${key}]`, param.join('/'));
-        }
-        return url.replace(`[${key}]`, param);
-      },
-      sourcepath
-        .replace(/\.(tsx|ts|jsx|js)/, '')
-        .replace(/^(.*?)src\/pages/, '')
-        .replace(/\/index$/, '')
-    ) || '/'
-  );
-}
-
-async function getUrlToGetStaticProps(
-  routes: RouteConfig[]
-): Promise<Record<string, () => Promise<unknown>>> {
-  const entriesLists: [string, () => Promise<unknown>][][] = await Promise.all(
-    routes.map(async (route) => {
-      const paramsList = (await route.getStaticPaths?.()) || [];
-
-      if (paramsList.length) {
-        return paramsList.map<[string, () => Promise<unknown>]>((params) => {
-          const pathname = getUrlFromSourcepath(route.sourcepath, params);
-          return [
-            pathname,
-            () => route.getStaticProps?.({ params, pathname }) || Promise.resolve({}),
-          ];
-        });
-      }
-      const pathname = getUrlFromSourcepath(route.sourcepath, {});
-      return [
-        [pathname, () => route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({})],
-      ];
-    })
-  );
-
-  return Object.fromEntries(entriesLists.flat());
 }
 
 const start = process.argv.includes('generate') ? generate : devServer;

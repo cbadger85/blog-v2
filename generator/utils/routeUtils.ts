@@ -12,6 +12,7 @@ export function getPathFromSourcepath(sourcePath: string): string {
   return path || '/';
 }
 
+// TODO Delete
 export function getFilenameFromSourcepath(
   sourcepath: string,
   params: Record<string, string | string[]>,
@@ -53,6 +54,7 @@ export function getUrlFromSourcepath(
   );
 }
 
+// TODO Delete
 export async function matchRoute(routes: RouteConfig[], url: string): Promise<RouteConfig | null> {
   const pathnameToRoute = Object.fromEntries(
     (
@@ -75,6 +77,7 @@ export async function matchRoute(routes: RouteConfig[], url: string): Promise<Ro
   return pathnameToRoute[url] || null;
 }
 
+// TODO Delete
 export async function getStaticPropsFromUrl(
   routes: RouteConfig[],
   url: string
@@ -107,4 +110,30 @@ export function loadModuleFromPathname(
   const firstMatch = matchRoutes(routes, pathname)?.[0];
 
   return (firstMatch?.route as RouteConfig)?.loadComponent();
+}
+
+export async function getUrlToGetStaticProps(
+  routes: RouteConfig[]
+): Promise<Record<string, () => Promise<unknown>>> {
+  const entriesLists: [string, () => Promise<unknown>][][] = await Promise.all(
+    routes.map(async (route) => {
+      const paramsList = (await route.getStaticPaths?.()) || [];
+
+      if (paramsList.length) {
+        return paramsList.map<[string, () => Promise<unknown>]>((params) => {
+          const pathname = getUrlFromSourcepath(route.sourcepath, params);
+          return [
+            pathname,
+            () => route.getStaticProps?.({ params, pathname }) || Promise.resolve({}),
+          ];
+        });
+      }
+      const pathname = getUrlFromSourcepath(route.sourcepath, {});
+      return [
+        [pathname, () => route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({})],
+      ];
+    })
+  );
+
+  return Object.fromEntries(entriesLists.flat());
 }

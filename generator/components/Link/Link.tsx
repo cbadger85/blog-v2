@@ -3,7 +3,7 @@ import { routes } from '@generator/routes';
 import { loadModuleFromPathname } from '@generator/utils/routeUtils';
 import { forwardRef, HTMLAttributeAnchorTarget, ReactNode } from 'react';
 import { To, useHref, useLinkClickHandler } from 'react-router-dom';
-import { usePageTransition } from '../PageTransitionProvider/PageTransitionProvider';
+import { usePageTransition } from '@generator/components/PageTransitionProvider';
 
 export interface LinkProps {
   to: To;

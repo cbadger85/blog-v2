@@ -4,6 +4,8 @@ export {
   getPathFromSourcepath,
   getFilenameFromSourcepath,
   matchRoute,
+  getUrlToGetStaticProps,
+  getUrlFromSourcepath,
 } from '@generator/utils/routeUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

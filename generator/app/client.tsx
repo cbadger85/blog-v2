@@ -4,7 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from '@generator/components/App';
 import { AppProps } from '@generator/types';
-import { PageTransitionProvider } from '@generator/components/PageTransitionProvider/PageTransitionProvider';
+import { PageTransitionProvider } from '@generator/components/PageTransitionProvider';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
   import.meta.globEager('@app/app.(tsx|ts|jsx|js)')
