@@ -31,8 +31,6 @@ export default defineConfig({
   build: {
     outDir: 'build',
     emptyOutDir: true,
-    manifest: true,
-    ssrManifest: true,
   },
   server: {
     open: true,

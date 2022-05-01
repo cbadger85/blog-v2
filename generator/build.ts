@@ -12,6 +12,7 @@ const rmAsync = fsPromises.rm;
 
 export default function ssgBuild(): Plugin {
   let resolvedConfig: ResolvedConfig;
+  let manifest: Record<string, { css: string[]; js: string }>;
 
   return {
     name: 'ssg:build',
@@ -39,7 +40,28 @@ export default function ssgBuild(): Plugin {
       resolvedConfig = config;
     },
 
-    async buildStart() {
+    generateBundle(_options, bundle) {
+      if (resolvedConfig.mode === 'ssr') {
+        return;
+      }
+
+      manifest = Object.fromEntries(
+        Object.entries(bundle)
+          .filter(([, c]) => c.type === 'chunk')
+          .map(([asset, output]) => {
+            const chunk = output as OutputChunk;
+
+            const { importedCss } = (chunk as any)?.viteMetadata || {};
+
+            return [
+              chunk.facadeModuleId,
+              { css: importedCss ? Array.from(importedCss) : [], js: asset },
+            ];
+          })
+      );
+    },
+
+    async closeBundle() {
       if (resolvedConfig.mode === 'ssr') {
         return;
       }
@@ -59,27 +81,6 @@ export default function ssgBuild(): Plugin {
           },
         },
       });
-    },
-
-    async generateBundle(_options, bundle) {
-      if (resolvedConfig.mode === 'ssr') {
-        return;
-      }
-
-      const manifest = Object.fromEntries(
-        Object.entries(bundle)
-          .filter(([, c]) => c.type === 'chunk')
-          .map(([asset, output]) => {
-            const chunk = output as OutputChunk;
-
-            const { importedCss } = (chunk as any)?.viteMetadata || {};
-
-            return [
-              chunk.facadeModuleId,
-              { css: importedCss ? Array.from(importedCss) : [], js: asset },
-            ];
-          })
-      );
 
       const { preloader, routes } = await import(
         path.resolve(resolvedConfig.root, 'generator/_lib/server.js')
