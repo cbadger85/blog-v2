@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import { getUrlToGetStaticProps } from '@generator/utils';
 import dotenv from 'dotenv';
-import express from 'express';
 import { createWriteStream, promises as fsPromises } from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
-import { build, createServer as createViteServer } from 'vite';
+import { build } from 'vite';
 
 const {
   readFile: readFileAsync,
@@ -18,84 +17,6 @@ const {
 dotenv.config();
 
 const root = process.cwd();
-
-async function devServer() {
-  const port = process.env.SERVER_PORT || 3000;
-  const open = process.env.SERVER_OPEN_BROWSER === 'true';
-
-  const app = express();
-
-  const vite = await createViteServer({
-    server: {
-      middlewareMode: 'ssr',
-      open,
-    },
-  });
-
-  app.use(vite.middlewares);
-
-  app.use('*', async (req, res, next) => {
-    try {
-      const url = req.originalUrl;
-
-      const template = await readFileAsync(path.resolve(root, 'index.html'), 'utf8').then((file) =>
-        vite.transformIndexHtml(url, file)
-      );
-
-      const { render, preloader, routes } = await vite.ssrLoadModule(
-        path.resolve(root, 'generator/app/server.tsx')
-      );
-
-      const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
-
-      const initialProps = await urlToGetStaticProps[
-        url === '/index.json' ? '/' : url.replace('/index.json', '')
-      ]?.();
-
-      if (url.endsWith('index.json')) {
-        if (initialProps) {
-          res.send(initialProps);
-          return;
-        }
-
-        res.sendStatus(404);
-        return;
-      }
-
-      const preloadedData = await preloader();
-
-      render(
-        url,
-        { preloadedData, initialProps },
-        ({ pipe }: PipeableStream, helmetData: HelmetServerState, err: unknown) => {
-          if (err !== null) {
-            console.error(err);
-          }
-
-          const [header, body] = hydrateTemplate(template, helmetData, {
-            preloadedData,
-            initialProps,
-          }).split('<!--ssr-->');
-
-          res.status(200).set({ 'Content-Type': 'text/html' });
-          res.write(header);
-          pipe(res);
-          res.write(body);
-          res.end();
-        }
-      );
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        vite.ssrFixStacktrace(e);
-      }
-      next(e);
-    }
-  });
-
-  app.listen(port, () => {
-    console.log(`Development server started on: http://localhost:${port}`);
-  });
-}
 
 async function generate() {
   try {
@@ -242,6 +163,4 @@ function hydrateTemplate(
     .replace('data-ssr-body-attributes', helmetData.bodyAttributes.toString());
 }
 
-const start = process.argv.includes('generate') ? generate : devServer;
-
-start();
+generate();

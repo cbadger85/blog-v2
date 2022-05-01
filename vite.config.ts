@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import dev from './generator/dev';
 
 export default defineConfig(({ mode }) => {
   const baseConfig = defineConfig({
@@ -19,6 +20,7 @@ export default defineConfig(({ mode }) => {
         }),
         apply: 'serve',
       },
+      dev(),
     ],
     resolve: {
       alias: {
@@ -52,6 +54,9 @@ export default defineConfig(({ mode }) => {
     default:
       return {
         ...baseConfig,
+        server: {
+          open: true,
+        },
         build: {
           outDir: 'build',
         },
