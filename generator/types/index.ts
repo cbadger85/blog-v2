@@ -1,5 +1,5 @@
-import { AppPageProps } from '@generator/components/App/App';
 import { ComponentType, FC, LazyExoticComponent } from 'react';
+import { AppPageProps } from '../components/App';
 
 export interface AppProps {
   Component: FC<AppPageProps>;

@@ -2,8 +2,8 @@ import { StaticRouter } from 'react-router-dom/server.js';
 import { FC, StrictMode } from 'react';
 import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
-import { App } from '@generator/components/App';
-import { AppProps } from '@generator/types';
+import { App } from '../components/App';
+import { AppProps } from '../types';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
   import.meta.globEager('@app/app.(tsx|ts|jsx|js)')
@@ -55,4 +55,4 @@ export const preloader =
     return {};
   };
 
-export { routes } from '@generator/routes';
+export { routes } from '../routes';

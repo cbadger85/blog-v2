@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-import { getUrlToGetStaticProps } from '@generator/utils';
 import dotenv from 'dotenv';
 import { promises as fsPromises } from 'fs';
 import path from 'path';
 import { build } from 'vite';
+import { getUrlToGetStaticProps } from './utils';
 import { writePage } from './utils/pageUtils';
 
 const { readFile: readFileAsync, rm: rmAsync } = fsPromises;

@@ -1,5 +1,5 @@
-import { usePageTransition } from './components/PageTransitionProvider/PageTransitionProvider';
+import { usePageTransition } from './components/PageTransitionProvider';
 
-export { type LinkProps, Link } from '@generator/components/Link';
+export { type LinkProps, Link } from './components/Link';
 
 export const useIsPageTransitionPending = () => usePageTransition()[0];

@@ -29,6 +29,8 @@ export async function writePage(
     template
   ).then(() => console.log(path.relative(root, htmlFilepath)));
 
+  await htmlFile;
+
   if (!pageData.initialProps) {
     await htmlFile;
   } else {
@@ -66,6 +68,8 @@ async function writeHtmlFile(
   await createDir(pageInfo.filepath);
 
   const { render } = await import(path.resolve(root, 'generator/_lib/server.js'));
+
+  // const { render } = await import('../app/server');
 
   return new Promise((resolve, reject) => {
     const htmlWriteStream = createWriteStream(pageInfo.filepath);

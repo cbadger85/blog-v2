@@ -1,5 +1,5 @@
-import { RouteConfig } from '@generator/types';
 import { matchRoutes } from 'react-router-dom';
+import { RouteConfig } from '../types';
 
 export function getPathFromSourcepath(sourcePath: string): string {
   const path = sourcePath

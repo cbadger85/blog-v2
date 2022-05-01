@@ -1,5 +1,1 @@
-export {
-  PageDataCache,
-  usePreload,
-  useQueryPageData,
-} from '@generator/components/PageDataCache/PageDataCache';
+export { PageDataCache, usePreload, useQueryPageData } from './PageDataCache';

@@ -1,6 +1,6 @@
-import { RouteConfig, StaticPropsContext } from '@generator/types';
 import { lazy } from 'react';
-import { getPathFromSourcepath } from '@generator/utils';
+import { RouteConfig, StaticPropsContext } from './types';
+import { getPathFromSourcepath } from './utils';
 
 const ROUTES = import.meta.glob('@app/pages/**/([a-z[]*|404).(tsx|ts|jsx|js)');
 

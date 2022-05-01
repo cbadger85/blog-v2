@@ -1,5 +1,5 @@
-import { RouteConfig } from '@generator/types';
-import { getPathFromSourcepath, getFilenameFromSourcepath, matchRoute } from '@generator/utils';
+import { RouteConfig } from '../types';
+import { getFilenameFromSourcepath, getPathFromSourcepath, matchRoute } from '.';
 
 describe('getPathFromSourcepath', () => {
   const parameters = [

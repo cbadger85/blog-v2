@@ -1,1 +1,1 @@
-export { type AppPageProps, App } from '@generator/components/App/App';
+export { type AppPageProps, App } from './App';

@@ -11,11 +11,11 @@ import { hydrateTemplate } from './utils/templateUtils';
 
 const { readFile: readFileAsync } = fsPromises;
 
-export default function dev(): Plugin {
+export default function ssgDev(): Plugin {
   let resolvedConfig: ResolvedConfig;
 
   return {
-    name: 'vite-plugin-ssg:dev',
+    name: 'ssg:dev',
     apply: 'serve',
     configResolved(config) {
       resolvedConfig = config;

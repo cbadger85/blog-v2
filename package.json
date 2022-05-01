@@ -6,7 +6,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "node --no-warnings --loader ./loader.js generator/start.ts",
+    "build": "vite build",
+    "build2": "node --no-warnings --loader ./loader.js generator/start.ts",
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "serve": "vite preview --port 3000",

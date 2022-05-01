@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { noop } from '@generator/utils';
+import { noop } from '../../utils';
 
 const PageDataCacheContext = createContext<{
   preload: (href: string) => void;

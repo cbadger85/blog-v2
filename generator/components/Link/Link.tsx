@@ -1,9 +1,9 @@
-import { usePreload } from '@generator/components/PageDataCache';
-import { routes } from '@generator/routes';
-import { loadModuleFromPathname } from '@generator/utils/routeUtils';
 import { forwardRef, HTMLAttributeAnchorTarget, ReactNode } from 'react';
 import { To, useHref, useLinkClickHandler } from 'react-router-dom';
-import { usePageTransition } from '@generator/components/PageTransitionProvider';
+import { routes } from '../../routes';
+import { loadModuleFromPathname } from '../../utils/routeUtils';
+import { usePreload } from '../PageDataCache';
+import { usePageTransition } from '../PageTransitionProvider';
 
 export interface LinkProps {
   to: To;
