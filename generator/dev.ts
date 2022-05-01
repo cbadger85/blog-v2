@@ -1,15 +1,12 @@
 /* eslint-disable no-console */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-param-reassign */
-import { promises as fsPromises } from 'fs';
 import path from 'path';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
 import { Plugin, ResolvedConfig } from 'vite';
 import { getUrlToGetStaticProps } from './utils/routeUtils';
-import { hydrateTemplate } from './utils/templateUtils';
-
-const { readFile: readFileAsync } = fsPromises;
+import { buildTemplate, hydrateTemplate } from './utils/templateUtils';
 
 export default function ssgDev(): Plugin {
   let resolvedConfig: ResolvedConfig;
@@ -28,19 +25,20 @@ export default function ssgDev(): Plugin {
           const url = req.originalUrl as string;
 
           try {
-            const template = await readFileAsync(path.resolve(root, 'index.html'), 'utf8').then(
-              (file) => server.transformIndexHtml(url, file)
+            const template = await server.transformIndexHtml(
+              url,
+              buildTemplate(path.resolve(root, 'generator/app/client.tsx').substring(1))
             );
 
             const { render, preloader, routes } = await server.ssrLoadModule(
               path.resolve(root, 'generator/app/server.tsx')
             );
 
-            const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
+            const urlToGetStaticProps = await getUrlToGetStaticProps(routes, {}, '');
 
             const initialProps = await urlToGetStaticProps[
               url === '/index.json' ? '/' : url.replace('/index.json', '')
-            ]?.();
+            ]?.getStaticProps?.();
 
             if (url.endsWith('index.json')) {
               if (initialProps) {

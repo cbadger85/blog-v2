@@ -26,11 +26,11 @@ async function generate() {
 
     const preloadedData = await preloader();
 
-    const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
+    const urlToGetStaticProps = await getUrlToGetStaticProps(routes, {}, '');
 
     await Promise.all(
-      Object.entries(urlToGetStaticProps).map(async ([url, getStaticProps]) => {
-        const initialProps = await getStaticProps();
+      Object.entries(urlToGetStaticProps).map(async ([url, assets]) => {
+        const initialProps = (await assets?.getStaticProps?.()) || {};
 
         await writePage(root, url, { preloadedData, initialProps }, template);
       })

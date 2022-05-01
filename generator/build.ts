@@ -1,10 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-param-reassign */
-import { Plugin, ResolvedConfig, build } from 'vite';
-import path from 'path';
 import { promises as fsPromises } from 'fs';
-import { getUrlToGetStaticProps } from './utils/routeUtils';
+import path from 'path';
+import type { OutputChunk } from 'rollup';
+import { Plugin, ResolvedConfig, build } from 'vite';
 import { writePage } from './utils/pageUtils';
+import { getUrlToGetStaticProps } from './utils/routeUtils';
+import { buildTemplate } from './utils/templateUtils';
 
 const rmAsync = fsPromises.rm;
 
@@ -15,6 +17,24 @@ export default function ssgBuild(): Plugin {
     name: 'ssg:build',
     apply: 'build',
     enforce: 'post',
+
+    config(config) {
+      if (config.mode === 'ssr') {
+        return config;
+      }
+
+      return {
+        ...config,
+        build: {
+          ...config.build,
+          rollupOptions: {
+            ...config.build?.rollupOptions,
+            input: path.resolve(config.root || process.cwd(), 'generator/app/client.tsx'),
+          },
+        },
+      };
+    },
+
     configResolved(config) {
       resolvedConfig = config;
     },
@@ -41,18 +61,25 @@ export default function ssgBuild(): Plugin {
       });
     },
 
-    // writeBundle(_options, bundle) {
-    //   if (resolvedConfig.mode === 'ssr') {
-    //     return;
-    //   }
-
-    //   // delete bundle['index.html'];
-    // },
-
     async generateBundle(_options, bundle) {
       if (resolvedConfig.mode === 'ssr') {
         return;
       }
+
+      const manifest = Object.fromEntries(
+        Object.entries(bundle)
+          .filter(([, c]) => c.type === 'chunk')
+          .map(([asset, output]) => {
+            const chunk = output as OutputChunk;
+
+            const { importedCss } = (chunk as any)?.viteMetadata || {};
+
+            return [
+              chunk.facadeModuleId,
+              { css: importedCss ? Array.from(importedCss) : [], js: asset },
+            ];
+          })
+      );
 
       const { preloader, routes } = await import(
         path.resolve(resolvedConfig.root, 'generator/_lib/server.js')
@@ -60,21 +87,19 @@ export default function ssgBuild(): Plugin {
 
       const preloadedData = await preloader();
 
-      const urlToGetStaticProps = await getUrlToGetStaticProps(routes);
+      const urlToGetStaticProps = await getUrlToGetStaticProps(routes, manifest, __dirname);
 
-      const htmlBundle = bundle['index.html'];
-
-      if (htmlBundle?.type !== 'asset') {
-        throw new Error('missing index.html');
-      }
-
-      const template = `${htmlBundle.source}`;
-
-      delete bundle['index.html'];
+      const baseAssets = manifest[path.resolve(__dirname, 'app/client.tsx')];
 
       await Promise.all(
-        Object.entries(urlToGetStaticProps).map(async ([url, getStaticProps]) => {
-          const initialProps = await getStaticProps();
+        Object.entries(urlToGetStaticProps).map(async ([url, assets]) => {
+          const initialProps = (await assets?.getStaticProps()) || {};
+
+          const template = buildTemplate(
+            baseAssets.js,
+            [...baseAssets.css, ...(assets?.css || [])],
+            assets?.js
+          );
 
           await writePage(resolvedConfig.root, url, { preloadedData, initialProps }, template);
         })

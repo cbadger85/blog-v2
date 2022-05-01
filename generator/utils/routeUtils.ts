@@ -112,26 +112,39 @@ export function loadModuleFromPathname(
   return (firstMatch?.route as RouteConfig)?.loadComponent();
 }
 
+export type Mainfest = Record<string, { css: string[]; js: string }>;
+
+export interface PageAssets {
+  getStaticProps: () => Promise<unknown>;
+  css: string[];
+  js: string;
+}
+
 export async function getUrlToGetStaticProps(
-  routes: RouteConfig[]
-): Promise<Record<string, () => Promise<unknown>>> {
-  const entriesLists: [string, () => Promise<unknown>][][] = await Promise.all(
+  routes: RouteConfig[],
+  manifest: Mainfest,
+  routeRoute: string
+): Promise<Record<string, PageAssets | undefined>> {
+  const entriesLists: [string, PageAssets][][] = await Promise.all(
     routes.map(async (route) => {
       const paramsList = (await route.getStaticPaths?.()) || [];
 
+      const filepath = (await import('path')).resolve(routeRoute, route.sourcepath);
+
+      const assets = manifest[filepath];
+
       if (paramsList.length) {
-        return paramsList.map<[string, () => Promise<unknown>]>((params) => {
+        return paramsList.map<[string, PageAssets]>((params) => {
           const pathname = getUrlFromSourcepath(route.sourcepath, params);
-          return [
-            pathname,
-            () => route.getStaticProps?.({ params, pathname }) || Promise.resolve({}),
-          ];
+          const getStaticProps = () =>
+            route.getStaticProps?.({ params, pathname }) || Promise.resolve({});
+          return [pathname, { getStaticProps, ...assets }];
         });
       }
       const pathname = getUrlFromSourcepath(route.sourcepath, {});
-      return [
-        [pathname, () => route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({})],
-      ];
+      const getStaticProps = () =>
+        route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({});
+      return [[pathname, { getStaticProps, ...assets }]];
     })
   );
 
