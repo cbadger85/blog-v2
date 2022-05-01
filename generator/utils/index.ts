@@ -1,4 +1,4 @@
-export { isTruthy, hasOwnProperty } from '@generator/utils/typeGuards';
+export { isTruthy, hasOwnProperty } from './typeGuards';
 
 export {
   getPathFromSourcepath,

@@ -11,12 +11,14 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tsconfigPaths(),
-      !['ssr', 'build'].includes(mode) &&
-        checker({
+      {
+        ...checker({
           overlay: false,
           typescript: true,
           eslint: { lintCommand: 'eslint "./src/**/*.{ts,tsx}"' },
         }),
+        apply: 'serve',
+      },
     ],
     resolve: {
       alias: {
