@@ -6,7 +6,7 @@ import { App } from './components/App';
 import { AppProps } from './types';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
-  import.meta.globEager('/app.(tsx|ts|jsx|js)')
+  import.meta.globEager('/src/app.(tsx|ts|jsx|js)')
 )[0]?.default;
 
 interface PageData {
@@ -50,7 +50,7 @@ export function render(
 }
 
 export const preloader =
-  Object.values(import.meta.globEager('/server.(tsx|ts|jsx|js)'))[0]?.preloader ||
+  Object.values(import.meta.globEager('/src/server.(tsx|ts|jsx|js)'))[0]?.preloader ||
   function preloader() {
     return {};
   };

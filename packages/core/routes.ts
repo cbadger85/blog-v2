@@ -4,7 +4,7 @@ import { RouteConfig, StaticPropsContext } from './types';
 export function getPathFromSourcepath(sourcePath: string): string {
   const path = sourcePath
     .replace(/\.(tsx|ts|jsx|js)/, '')
-    .replace(/\/pages/, '')
+    .replace(/\/src\/pages/, '')
     .replace(/\/index$/, '')
     .replace(/\[\.{3}.+\]/, '*')
     .replace(/\[(.+)\]/, ':$1');
@@ -12,7 +12,7 @@ export function getPathFromSourcepath(sourcePath: string): string {
   return path || '/';
 }
 
-const ROUTES = import.meta.glob('/pages/**/([a-z[]*|404).(tsx|ts|jsx|js)');
+const ROUTES = import.meta.glob('/src/pages/**/([a-z[]*|404).(tsx|ts|jsx|js)');
 
 export const routes: RouteConfig[] = Object.entries(ROUTES).map(([sourcepath, module]) => {
   return {

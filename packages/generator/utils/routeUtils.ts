@@ -4,7 +4,7 @@ import { RouteConfig } from '@blog/core/types';
 export function getPathFromSourcepath(sourcePath: string): string {
   const path = sourcePath
     .replace(/\.(tsx|ts|jsx|js)/, '')
-    .replace(/^(.*?)src\/pages/, '')
+    .replace(/\/src\/pages/, '')
     .replace(/\/index$/, '')
     .replace(/\[\.{3}.+\]/, '*')
     .replace(/\[(.+)\]/, ':$1');
@@ -28,7 +28,7 @@ export function getFilenameFromSourcepath(
       },
       sourcepath
         .replace(/\.(tsx|ts|jsx|js)/, '')
-        .replace(/^(.*?)src\/pages/, '')
+        .replace(/\/src\/pages/, '')
         .replace(/\/index$/, '')
     ) + `/index${ext}`
   );
@@ -123,13 +123,13 @@ export interface PageAssets {
 export async function getUrlToGetStaticProps(
   routes: RouteConfig[],
   manifest: Mainfest,
-  routeRoute: string
+  rootPath: string
 ): Promise<Record<string, PageAssets | undefined>> {
   const entriesLists: [string, PageAssets][][] = await Promise.all(
     routes.map(async (route) => {
       const paramsList = (await route.getStaticPaths?.()) || [];
 
-      const filepath = (await import('path')).resolve(routeRoute, route.sourcepath);
+      const filepath = (await import('path')).resolve(rootPath, route.sourcepath);
 
       const assets = manifest[filepath];
 

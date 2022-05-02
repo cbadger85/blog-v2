@@ -1,25 +1,18 @@
-/* eslint-disable no-console */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-param-reassign */
-import path from 'path';
+import { createRequire } from 'module';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';
-import { Plugin, ResolvedConfig } from 'vite';
+import { Plugin } from 'vite';
 import { getUrlToGetStaticProps } from './utils/routeUtils';
 import { buildTemplate, hydrateTemplate } from './utils/templateUtils';
 
-export default function ssgDev(): Plugin {
-  let resolvedConfig: ResolvedConfig;
+const require = createRequire(/* @vite-ignore */ import.meta.url);
 
+export default function ssgDev(): Plugin {
   return {
     name: 'ssg:dev',
     apply: 'serve',
-    configResolved(config) {
-      resolvedConfig = config;
-    },
-    configureServer(server) {
-      const { root } = resolvedConfig;
 
+    configureServer(server) {
       return () => {
         server.middlewares.use(async (req, res, next) => {
           const url = req.originalUrl as string;
@@ -27,14 +20,14 @@ export default function ssgDev(): Plugin {
           try {
             const template = await server.transformIndexHtml(
               url,
-              buildTemplate(path.resolve(root, 'generator/app/client.tsx').substring(1))
+              buildTemplate(require.resolve('@blog/core/client.tsx').substring(1))
             );
 
             const { render, preloader, routes } = await server.ssrLoadModule(
-              path.resolve(root, 'generator/app/server.tsx')
+              require.resolve('@blog/core/server.tsx')
             );
 
-            const urlToGetStaticProps = await getUrlToGetStaticProps(routes, {}, '');
+            const urlToGetStaticProps = await getUrlToGetStaticProps(routes, {}, process.cwd());
 
             const initialProps = await urlToGetStaticProps[
               url === '/index.json' ? '/' : url.replace('/index.json', '')

@@ -1,9 +1,0 @@
-{
-  "extends": "@blog/tsconfig/base.json",
-  "include": ["global.d.ts", "custom.d.ts", "**/*.ts", "**/*.tsx", "@blog/generator"],
-  "exclude": ["node_modules"],
-  "compilerOptions": {
-    "target": "ESNext",
-    "plugins": [{ "name": "typescript-plugin-css-modules" }]
-  }
-}

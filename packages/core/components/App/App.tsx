@@ -6,10 +6,12 @@ import { Page } from '../Page';
 import { PageDataCache } from '../PageDataCache';
 
 const ErrorPage: FC =
-  Object.values(import.meta.globEager('/pages/500.(tsx|ts|jsx|js)'))[0]?.default || (() => null);
+  Object.values(import.meta.globEager('/src/pages/500.(tsx|ts|jsx|js)'))[0]?.default ||
+  (() => null);
 
 const NotFoundPage: FC =
-  Object.values(import.meta.globEager('/pages/404.(tsx|ts|jsx|js)'))[0]?.default || (() => null);
+  Object.values(import.meta.globEager('/src/pages/404.(tsx|ts|jsx|js)'))[0]?.default ||
+  (() => null);
 
 export interface AppPageProps {
   initialProps: unknown;

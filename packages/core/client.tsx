@@ -7,7 +7,7 @@ import { AppProps } from './types';
 import { PageTransitionProvider } from './components/PageTransitionProvider';
 
 const CustomApp: FC<AppProps> | undefined = Object.values(
-  import.meta.globEager('/app.(tsx|ts|jsx|js)')
+  import.meta.globEager('/src/app.(tsx|ts|jsx|js)')
 )[0]?.default;
 
 async function main() {

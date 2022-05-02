@@ -14,6 +14,10 @@ const require = createRequire(/* @vite-ignore */ import.meta.url);
 const rmAsync = fsPromises.rm;
 
 export default function ssgBuild(): Plugin {
+  const buildDir = path.join(path.dirname(require.resolve('@blog/generator')), '..', 'lib');
+  const serverFilename = 'server.js';
+  const serverFilepath = path.resolve(buildDir, serverFilename);
+
   let resolvedConfig: ResolvedConfig;
   let manifest: Record<string, { css: string[]; js: string }>;
 
@@ -69,12 +73,6 @@ export default function ssgBuild(): Plugin {
         return;
       }
 
-      const buildDir = path.join(path.dirname(require.resolve('@blog/generator')), '..', 'lib');
-      const serverFilename = 'server.js';
-      const serverFilepath = path.resolve(buildDir, serverFilename);
-
-      await clean(buildDir);
-
       process.env.NODE_ENV = 'production';
 
       await build({
@@ -122,6 +120,8 @@ export default function ssgBuild(): Plugin {
           );
         })
       );
+
+      await clean(buildDir);
     },
   };
 }
