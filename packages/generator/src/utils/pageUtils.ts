@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import { createWriteStream, promises as fsPromises } from 'fs';
 import path from 'path';
-import { PipeableStream } from 'react-dom/server';
-import { HelmetServerState } from 'react-helmet-async';
+import type { PipeableStream } from 'react-dom/server';
+import type { HelmetServerState } from 'react-helmet-async';
 import { hydrateTemplate } from './templateUtils';
 
 const { writeFile: writeFileAsync, mkdir: mkdirAsync } = fsPromises;

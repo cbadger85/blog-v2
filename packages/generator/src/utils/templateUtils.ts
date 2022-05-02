@@ -1,4 +1,4 @@
-import { HelmetServerState } from 'react-helmet-async';
+import type { HelmetServerState } from 'react-helmet-async';
 
 interface TemplateData {
   preloadedData: unknown;

@@ -1,4 +1,4 @@
-import { PagePropsFromStaticProps, StaticPropsContext } from '@blog/core/types';
+import { PagePropsFromStaticProps, StaticPropsContext } from '@blog/core';
 
 export function getStaticPaths() {
   return [

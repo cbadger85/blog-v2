@@ -34,8 +34,25 @@ module.exports = {
         tsx: 'never',
       },
     ],
-    'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
+    // 'import/no-extraneous-dependencies': [
+    //   'error',
+    //   {
+    //     devDependencies: [
+    //       '**/*.test.{ts,tsx}',
+    //       '**/*.spec.{ts,tsx}',
+    //       'setupTests.ts',
+    //       'vite.config.ts',
+    //       '.eslintrc.cjs',
+    //     ],
+    //     packageDir: [
+    //       path.join(__dirname, '../../blog'),
+    //       path.join(__dirname, '../core'),
+    //       path.join(__dirname, '../generator'),
+    //     ],
+    //   },
+    // ],
+    'import/no-extraneous-dependencies': 'off',
     'react/require-default-props': 'off',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [

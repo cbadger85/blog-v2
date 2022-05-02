@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { createRequire } from 'module';
-import { PipeableStream } from 'react-dom/server';
-import { HelmetServerState } from 'react-helmet-async';
+import type { PipeableStream } from 'react-dom/server';
+import type { HelmetServerState } from 'react-helmet-async';
 import { Plugin } from 'vite';
 import { getUrlToGetStaticProps } from './utils/routeUtils';
 import { buildTemplate, hydrateTemplate } from './utils/templateUtils';
