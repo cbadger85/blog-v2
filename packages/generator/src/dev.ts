@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createRequire } from 'module';
 import { PipeableStream } from 'react-dom/server';
 import { HelmetServerState } from 'react-helmet-async';

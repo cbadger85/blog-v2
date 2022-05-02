@@ -12,3 +12,5 @@ coverage/
 build/
 dist/
 lib/
+
+tsconfig.tsbuildinfo

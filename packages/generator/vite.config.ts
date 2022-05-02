@@ -14,11 +14,11 @@ const EXTERNALS = [
 export default defineConfig({
   build: {
     outDir: 'dist',
-    // emptyOutDir: true,
+    emptyOutDir: true,
     target: 'esnext',
     lib: {
       fileName: 'index',
-      entry: './index.ts',
+      entry: './src/index.ts',
       formats: ['es'],
     },
     rollupOptions: {
