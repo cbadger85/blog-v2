@@ -1,4 +1,4 @@
-import { Link } from '@blog/core/router';
+import { Link } from '@blog/core';
 
 export default function Posts() {
   return (

@@ -1,5 +1,4 @@
-import { Link } from '@blog/core/router';
-import { PagePropsFromStaticProps } from '@blog/core/types';
+import { Link, PagePropsFromStaticProps } from '@blog/core';
 import crypto from 'crypto';
 import styles from './about.module.css';
 

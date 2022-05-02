@@ -3,13 +3,11 @@
   "author": "Charles Badger",
   "version": "0.0.1",
   "type": "module",
-  "main": "index.js",
+  "main": "index.ts",
+  "types": "index.ts",
   "files": [
     "server.tsx",
-    "client.tsx",
-    "head.ts",
-    "router.ts",
-    "types.ts"
+    "client.tsx"
   ],
   "scripts": {
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",

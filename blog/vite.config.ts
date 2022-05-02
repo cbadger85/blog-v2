@@ -25,7 +25,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    // open: true,
+    open: true,
   },
   test: {
     globals: true,

@@ -1,5 +1,4 @@
-import { type AppProps } from '@blog/core/types';
-import { Head } from '@blog/core/head';
+import { type AppProps, Head } from '@blog/core';
 import styles from './app.module.css';
 import './app.css';
 

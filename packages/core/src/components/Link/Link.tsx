@@ -6,10 +6,10 @@ import { usePreload } from '../PageDataCache';
 import { usePageTransition } from '../PageTransitionProvider';
 
 export function loadModuleFromPathname(
-  routes: RouteConfig[],
+  _routes: RouteConfig[],
   pathname: string
 ): Promise<Record<string, unknown>> {
-  const firstMatch = matchRoutes(routes, pathname)?.[0];
+  const firstMatch = matchRoutes(_routes, pathname)?.[0];
 
   return (firstMatch?.route as RouteConfig)?.loadComponent();
 }
