@@ -1,13 +1,13 @@
 import { render, waitFor } from '@testing-library/react';
-import { HelmetProvider } from 'react-helmet-async';
+import { HeadProvider } from '@blog/core';
 import App from './app';
 
 describe('<App />', () => {
   it('should render the app', () => {
     render(
-      <HelmetProvider>
+      <HeadProvider>
         <App initialProps={{}} Component={() => null} />
-      </HelmetProvider>
+      </HeadProvider>
     );
 
     expect(document.querySelector('#App')).toBeInTheDocument();
@@ -15,9 +15,9 @@ describe('<App />', () => {
 
   it('should render the metadata', async () => {
     render(
-      <HelmetProvider>
+      <HeadProvider>
         <App initialProps={{}} Component={() => null} />
-      </HelmetProvider>
+      </HeadProvider>
     );
 
     await waitFor(() => {
