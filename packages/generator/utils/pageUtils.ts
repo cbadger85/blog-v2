@@ -60,7 +60,7 @@ interface PageInfo {
 }
 
 async function writeHtmlFile(
-  pathToServerFile: astring,
+  pathToServerFile: string,
   pageInfo: PageInfo,
   { preloadedData, initialProps }: PageData,
   template: string
