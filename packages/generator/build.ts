@@ -69,9 +69,9 @@ export default function ssgBuild(): Plugin {
         return;
       }
 
-      const buildDir = path.join(path.dirname(require.resolve('@blog/generator')), 'dist');
-      const serverFilename = '.server';
-      const serverFilepath = path.resolve(buildDir, serverFilename + '.js');
+      const buildDir = path.join(path.dirname(require.resolve('@blog/generator')), '..', 'lib');
+      const serverFilename = 'server.js';
+      const serverFilepath = path.resolve(buildDir, serverFilename);
 
       await clean(buildDir);
 
@@ -83,11 +83,9 @@ export default function ssgBuild(): Plugin {
         build: {
           outDir: buildDir,
           ssr: require.resolve('@blog/core/server.tsx'),
-          emptyOutDir: false,
           rollupOptions: {
             output: {
               format: 'es',
-              name: serverFilename,
             },
           },
         },
@@ -115,7 +113,13 @@ export default function ssgBuild(): Plugin {
             assets?.js
           );
 
-          await writePage(serverFilename, url, { preloadedData, initialProps }, template);
+          await writePage(
+            resolvedConfig.root,
+            serverFilepath,
+            url,
+            { preloadedData, initialProps },
+            template
+          );
         })
       );
     },

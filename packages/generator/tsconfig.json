@@ -1,5 +1,5 @@
 {
   "extends": "@blog/tsconfig/base.json",
-  "include": ["global.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["global.d.ts", "**/*.ts", "**/*.tsx", "package.json"],
   "exclude": ["node_modules"]
 }

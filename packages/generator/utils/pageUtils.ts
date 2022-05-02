@@ -9,6 +9,7 @@ const { writeFile: writeFileAsync, mkdir: mkdirAsync } = fsPromises;
 
 export async function writePage(
   root: string,
+  pathToServerFile: string,
   url: string,
   pageData: PageData,
   template: string
@@ -20,7 +21,7 @@ export async function writePage(
     : path.join(filepath, 'index.html');
 
   const htmlFile = writeHtmlFile(
-    root,
+    pathToServerFile,
     {
       filepath: htmlFilepath,
       path: url,
