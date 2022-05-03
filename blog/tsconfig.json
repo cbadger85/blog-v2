@@ -1,10 +1,18 @@
 {
   "extends": "@blog/tsconfig/base.json",
-  "include": ["global.d.ts", "custom.d.ts", "**/*.ts", "**/*.tsx", "@blog/generator"],
+  "include": [
+    "./global.d.ts",
+    "./custom.d.ts",
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "./package.json",
+    "./vite.config.ts"
+  ],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "target": "ES2017",
     "noEmit": true,
-    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "types": ["vitest/globals", "vite/client"]
   }
 }

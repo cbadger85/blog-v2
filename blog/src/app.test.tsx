@@ -7,7 +7,7 @@ describe('<App />', () => {
     render(
       <HeadProvider>
         <App initialProps={{}} Component={() => null} />
-      </HeadProvider>
+      </HeadProvider>,
     );
 
     expect(document.querySelector('#App')).toBeInTheDocument();
@@ -17,7 +17,7 @@ describe('<App />', () => {
     render(
       <HeadProvider>
         <App initialProps={{}} Component={() => null} />
-      </HeadProvider>
+      </HeadProvider>,
     );
 
     await waitFor(() => {
