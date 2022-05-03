@@ -10,7 +10,7 @@
     "client.tsx"
   ],
   "scripts": {
-    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "lint": "TIMING=1 eslint \"**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"**/*.{ts,tsx}\" --fix",
     "test": "vitest --mode test",
     "test:coverage": "vitest run --mode test --coverage",

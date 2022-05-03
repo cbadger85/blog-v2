@@ -3,13 +3,7 @@
   "baseBranch": "origin/main",
   "pipeline": {
     "start": {
-      "cache": false,
-      "dependsOn": ["dev"]
-    },
-    "serve": {
-      "dependsOn": ["build"]
-    },
-    "dev": {
+      "dependsOn": ["@blog/generator#build"],
       "cache": false
     },
     "build": {

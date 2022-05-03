@@ -8,7 +8,7 @@
   "scripts": {
     "build": "vite build",
     "start": "vite dev",
-    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
+    "lint": "TIMING=1 eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "serve": "vite preview --port 3000",
     "test": "vitest --mode test",
