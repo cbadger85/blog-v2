@@ -2,6 +2,7 @@ import { createContext, ReactNode, useCallback, useContext, useMemo, useState } 
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
 const PageDataCacheContext = createContext<{
@@ -60,15 +61,15 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
 
       const pendingData = loadStaticProps(href)
         .then((data) =>
-          setCache((oldCache) => ({ ...oldCache, [href]: { status: 'SUCCESS', data } }))
+          setCache((oldCache) => ({ ...oldCache, [href]: { status: 'SUCCESS', data } })),
         )
         .catch((error: unknown) =>
-          setCache((oldCache) => ({ ...oldCache, [href]: { status: 'ERROR', error } }))
+          setCache((oldCache) => ({ ...oldCache, [href]: { status: 'ERROR', error } })),
         );
 
       setCache((oldCache) => ({ ...oldCache, [href]: { status: 'PENDING', pendingData } }));
     },
-    [cache]
+    [cache],
   );
 
   const queryPageData = useCallback(
@@ -86,7 +87,7 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
           throw loadData(href);
       }
     },
-    [cache, loadData]
+    [cache, loadData],
   );
 
   const context = useMemo(
@@ -94,7 +95,7 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
       queryPageData,
       preload: loadData,
     }),
-    [loadData, queryPageData]
+    [loadData, queryPageData],
   );
 
   return <PageDataCacheContext.Provider value={context}>{children}</PageDataCacheContext.Provider>;

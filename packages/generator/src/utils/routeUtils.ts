@@ -3,7 +3,7 @@ import type { RouteConfig } from '@blog/core';
 
 export function getUrlFromSourcepath(
   sourcepath: string,
-  params: Record<string, string | string[]>
+  params: Record<string, string | string[]>,
 ): string {
   return (
     Object.entries(params).reduce(
@@ -16,14 +16,14 @@ export function getUrlFromSourcepath(
       sourcepath
         .replace(/\.(tsx|ts|jsx|js)/, '')
         .replace(/^(.*?)src\/pages/, '')
-        .replace(/\/index$/, '')
+        .replace(/\/index$/, ''),
     ) || '/'
   );
 }
 
 export function loadModuleFromPathname(
   routes: RouteConfig[],
-  pathname: string
+  pathname: string,
 ): Promise<Record<string, unknown>> {
   const firstMatch = matchRoutes(routes, pathname)?.[0];
 
@@ -41,7 +41,7 @@ export interface PageAssets {
 export async function getUrlToPageAssets(
   routes: RouteConfig[],
   manifest: Mainfest,
-  rootPath: string
+  rootPath: string,
 ): Promise<Record<string, PageAssets | undefined>> {
   const entriesLists: [string, PageAssets][][] = await Promise.all(
     routes.map(async (route) => {
@@ -63,7 +63,7 @@ export async function getUrlToPageAssets(
       const getStaticProps = () =>
         route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({});
       return [[pathname, { getStaticProps, ...assets }]];
-    })
+    }),
   );
 
   return Object.fromEntries(entriesLists.flat());

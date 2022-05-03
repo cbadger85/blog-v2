@@ -7,7 +7,12 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
+    "start": "vite dev",
+    "test": "vitest --mode test",
+    "test:coverage": "vitest run --mode test --coverage",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "react-router-dom": "^6.3.0"

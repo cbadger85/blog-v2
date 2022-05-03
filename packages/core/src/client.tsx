@@ -31,7 +31,7 @@ export async function main() {
             </PageTransitionProvider>
           </BrowserRouter>
         </HelmetProvider>
-      </StrictMode>
+      </StrictMode>,
     );
   }
 }

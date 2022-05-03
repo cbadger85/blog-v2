@@ -58,13 +58,14 @@ export default function ssgBuild(): Plugin {
           .map(([asset, output]) => {
             const chunk = output as OutputChunk;
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { importedCss } = (chunk as any)?.viteMetadata || {};
 
             return [
               chunk.facadeModuleId,
               { css: importedCss ? Array.from(importedCss) : [], js: asset },
             ];
-          })
+          }),
       );
     },
 
@@ -104,7 +105,7 @@ export default function ssgBuild(): Plugin {
           const template = buildTemplate(
             baseAssets.js,
             [...baseAssets.css, ...(assets?.css || [])],
-            assets?.js
+            assets?.js,
           );
 
           await writePage(
@@ -112,9 +113,9 @@ export default function ssgBuild(): Plugin {
             serverFilepath,
             url,
             { preloadedData, initialProps },
-            template
+            template,
           );
-        })
+        }),
       );
 
       await clean(buildDir);

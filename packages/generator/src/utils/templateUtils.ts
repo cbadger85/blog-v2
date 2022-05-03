@@ -39,7 +39,7 @@ export function buildTemplate(entrypoint: string, css?: string[], js?: string): 
 export function hydrateTemplate(
   template: string,
   helmetData: HelmetServerState,
-  { preloadedData, initialProps }: TemplateData
+  { preloadedData, initialProps }: TemplateData,
 ): string {
   const contextScript =
     `<script>(function() { ` +

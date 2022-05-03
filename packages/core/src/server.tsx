@@ -13,13 +13,13 @@ interface PageData {
 type OnReadyCallback = (
   stream: PipeableStream,
   hydratedHelmetData: HelmetServerState,
-  e: unknown
+  e: unknown,
 ) => void;
 
 export function render(
   url: string,
   { preloadedData, initialProps }: PageData,
-  onAllReady: OnReadyCallback
+  onAllReady: OnReadyCallback,
 ) {
   const helmetData = {};
   const stream = renderToPipeableStream(
@@ -45,6 +45,6 @@ export function render(
 
         onAllReady(stream, helmet, null);
       },
-    }
+    },
   );
 }

@@ -7,7 +7,7 @@ import { usePageTransition } from '../PageTransitionProvider';
 
 export function loadModuleFromPathname(
   _routes: RouteConfig[],
-  pathname: string
+  pathname: string,
 ): Promise<Record<string, unknown>> {
   const firstMatch = matchRoutes(_routes, pathname)?.[0];
 
@@ -47,5 +47,5 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         {children}
       </a>
     );
-  }
+  },
 );

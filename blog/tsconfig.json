@@ -13,6 +13,6 @@
     "target": "ES2017",
     "noEmit": true,
     "plugins": [{ "name": "typescript-plugin-css-modules" }],
-    "types": ["vitest/globals", "vite/client"]
+    "types": ["vitest/globals", "vite/client", "@testing-library/jest-dom"]
   }
 }

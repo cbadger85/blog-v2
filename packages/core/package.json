@@ -10,8 +10,8 @@
     "client.tsx"
   ],
   "scripts": {
-    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"**/*.{ts,tsx}\" --fix",
     "test": "vitest --mode test",
     "test:coverage": "vitest run --mode test --coverage",
     "typecheck": "tsc"

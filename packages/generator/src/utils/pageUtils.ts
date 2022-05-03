@@ -12,7 +12,7 @@ export async function writePage(
   pathToServerFile: string,
   url: string,
   pageData: PageData,
-  template: string
+  template: string,
 ): Promise<void> {
   const filepath = path.join(root, 'build', url);
 
@@ -27,7 +27,7 @@ export async function writePage(
       path: url,
     },
     pageData,
-    template
+    template,
   ).then(() => console.log(path.relative(root, htmlFilepath)));
 
   await htmlFile;
@@ -38,7 +38,7 @@ export async function writePage(
     const jsonFilepath = path.join(filepath, 'index.json');
 
     const jsonFile = writeJsonFile(jsonFilepath, pageData.initialProps).then(() =>
-      console.log(path.relative(root, jsonFilepath))
+      console.log(path.relative(root, jsonFilepath)),
     );
 
     await Promise.all([htmlFile, jsonFile]);
@@ -64,7 +64,7 @@ async function writeHtmlFile(
   pathToServerFile: string,
   pageInfo: PageInfo,
   { preloadedData, initialProps }: PageData,
-  template: string
+  template: string,
 ): Promise<void> {
   await createDir(pageInfo.filepath);
 
@@ -89,7 +89,7 @@ async function writeHtmlFile(
         pipe(htmlWriteStream);
         htmlWriteStream.write(body);
         htmlWriteStream.end();
-      }
+      },
     );
 
     htmlWriteStream.on('error', (e: Error) => {

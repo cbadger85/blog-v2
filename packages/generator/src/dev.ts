@@ -21,11 +21,11 @@ export default function ssgDev(): Plugin {
           try {
             const template = await server.transformIndexHtml(
               url,
-              buildTemplate(require.resolve('@blog/core/client.tsx').substring(1))
+              buildTemplate(require.resolve('@blog/core/client.tsx').substring(1)),
             );
 
             const { render, preloader, routes } = await server.ssrLoadModule(
-              require.resolve('@blog/core/server.tsx')
+              require.resolve('@blog/core/server.tsx'),
             );
 
             const urlToGetStaticProps = await getUrlToPageAssets(routes, {}, process.cwd());
@@ -68,7 +68,7 @@ export default function ssgDev(): Plugin {
                 pipe(res);
                 res.write(body);
                 res.end();
-              }
+              },
             );
           } catch (e: unknown) {
             if (e instanceof Error) {
