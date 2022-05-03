@@ -7,6 +7,8 @@ const PageTransitionContext = createContext<[boolean, (cb: () => void) => void]>
 
 export const usePageTransition = () => useContext(PageTransitionContext);
 
+export const useIsPageTransitionPending = () => usePageTransition()[0];
+
 interface PageTransitionProviderProps {
   children?: ReactNode;
 }

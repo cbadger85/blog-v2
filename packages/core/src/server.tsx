@@ -1,13 +1,9 @@
 import { StaticRouter } from 'react-router-dom/server.js';
-import { FC, StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { renderToPipeableStream, PipeableStream } from 'react-dom/server';
 import { HelmetData, HelmetProvider, HelmetServerState } from 'react-helmet-async';
 import { App } from './components/App';
-import { AppProps } from './types';
-
-const CustomApp: FC<AppProps> | undefined = Object.values(
-  import.meta.globEager('/src/app.(tsx|ts|jsx|js)')
-)[0]?.default;
+import config from './config';
 
 interface PageData {
   preloadedData: unknown;
@@ -30,8 +26,12 @@ export function render(
     <StrictMode>
       <HelmetProvider context={helmetData}>
         <StaticRouter location={url}>
-          {CustomApp ? (
-            <CustomApp Component={App} initialProps={initialProps} preloadedData={preloadedData} />
+          {config.AppComponent ? (
+            <config.AppComponent
+              Component={App}
+              initialProps={initialProps}
+              preloadedData={preloadedData}
+            />
           ) : (
             <App initialProps={initialProps} />
           )}

@@ -3,7 +3,8 @@
   "include": ["global.d.ts", "custom.d.ts", "**/*.ts", "**/*.tsx", "@blog/generator"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2017",
+    "noEmit": true,
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   }
 }

@@ -1,6 +1,6 @@
 import { forwardRef, HTMLAttributeAnchorTarget, ReactNode } from 'react';
 import { matchRoutes, To, useHref, useLinkClickHandler } from 'react-router-dom';
-import { routes } from '../../routes';
+import config from '../../config';
 import { RouteConfig } from '../../types';
 import { usePreload } from '../PageDataCache';
 import { usePageTransition } from '../PageTransitionProvider';
@@ -41,7 +41,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         }}
         onMouseEnter={() => {
           preload(href);
-          loadModuleFromPathname(routes, href);
+          loadModuleFromPathname(config.routes, href);
         }}
       >
         {children}

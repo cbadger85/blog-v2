@@ -25,3 +25,11 @@ export interface StaticPropsContext<
   params: T;
   pathname: string;
 }
+
+export interface AppConfig {
+  AppComponent?: FC<AppProps>;
+  ErrorPage: FC;
+  NotFoundPage: FC;
+  routes: RouteConfig[];
+  preloader: () => Promise<unknown>;
+}

@@ -1,1 +1,5 @@
-export { PageTransitionProvider, usePageTransition } from './PageTransitionProvider';
+export {
+  PageTransitionProvider,
+  usePageTransition,
+  useIsPageTransitionPending,
+} from './PageTransitionProvider';

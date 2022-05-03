@@ -3,7 +3,7 @@ import { createRequire } from 'module';
 import type { PipeableStream } from 'react-dom/server';
 import type { HelmetServerState } from 'react-helmet-async';
 import { Plugin } from 'vite';
-import { getUrlToGetStaticProps } from './utils/routeUtils';
+import { getUrlToPageAssets } from './utils/routeUtils';
 import { buildTemplate, hydrateTemplate } from './utils/templateUtils';
 
 const require = createRequire(/* @vite-ignore */ import.meta.url);
@@ -28,7 +28,7 @@ export default function ssgDev(): Plugin {
               require.resolve('@blog/core/server.tsx')
             );
 
-            const urlToGetStaticProps = await getUrlToGetStaticProps(routes, {}, process.cwd());
+            const urlToGetStaticProps = await getUrlToPageAssets(routes, {}, process.cwd());
 
             const initialProps = await urlToGetStaticProps[
               url === '/index.json' ? '/' : url.replace('/index.json', '')

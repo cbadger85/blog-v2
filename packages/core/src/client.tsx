@@ -1,14 +1,10 @@
-import { FC, StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './components/App';
-import { AppProps } from './types';
 import { PageTransitionProvider } from './components/PageTransitionProvider';
-
-const CustomApp: FC<AppProps> | undefined = Object.values(
-  import.meta.globEager('/src/app.(tsx|ts|jsx|js)')
-)[0]?.default;
+import config from './config';
 
 export async function main() {
   const container = document.getElementById('root');
@@ -23,8 +19,8 @@ export async function main() {
         <HelmetProvider>
           <BrowserRouter>
             <PageTransitionProvider>
-              {CustomApp ? (
-                <CustomApp
+              {config.AppComponent ? (
+                <config.AppComponent
                   Component={App}
                   initialProps={initialProps}
                   preloadedData={preloadedData}

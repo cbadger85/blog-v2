@@ -4,7 +4,7 @@ import path from 'path';
 import type { OutputChunk } from 'rollup';
 import { build, Plugin, ResolvedConfig } from 'vite';
 import { writePage } from './utils/pageUtils';
-import { getUrlToGetStaticProps } from './utils/routeUtils';
+import { getUrlToPageAssets } from './utils/routeUtils';
 import { buildTemplate } from './utils/templateUtils';
 
 const SSG_MODE = 'ssg';
@@ -93,11 +93,7 @@ export default function ssgBuild(): Plugin {
 
       const preloadedData = await preloader();
 
-      const urlToGetStaticProps = await getUrlToGetStaticProps(
-        routes,
-        manifest,
-        resolvedConfig.root
-      );
+      const urlToGetStaticProps = await getUrlToPageAssets(routes, manifest, resolvedConfig.root);
 
       const baseAssets = manifest[require.resolve('@blog/core/client.tsx')];
 
