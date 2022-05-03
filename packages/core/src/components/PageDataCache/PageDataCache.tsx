@@ -1,6 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -102,18 +101,15 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
 }
 
 async function loadStaticProps(href: string): Promise<unknown> {
-  return axios
-    .get(`${href === '/' ? '' : href}/index.json`)
+  return fetch(`${href === '/' ? '' : href}/index.json`)
     .then((res) => {
-      const contentType = res.headers['content-type'];
+      const contentType = res.headers.get('content-type');
 
       if (!contentType || !contentType.includes('application/json')) {
         return {};
       }
 
-      return res.data;
+      return res.json();
     })
-    .catch(() => {
-      return {};
-    });
+    .catch(() => ({}));
 }

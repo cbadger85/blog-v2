@@ -6,6 +6,9 @@
       "cache": false,
       "dependsOn": ["dev"]
     },
+    "serve": {
+      "dependsOn": ["build"]
+    },
     "dev": {
       "cache": false
     },

@@ -18,14 +18,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.26.1",
-    "dotenv": "^16.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-helmet-async": "^1.3.0",
     "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
+    "@blog/config": "*",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.0.1",
     "@testing-library/user-event": "^14.1.0",
@@ -33,7 +32,6 @@
     "@types/react-dom": "^18.0.1",
     "@types/react-helmet-async": "^1.0.3",
     "c8": "^7.11.0",
-    "@blog/config": "*",
     "eslint": "^8.13.0",
     "jsdom": "^19.0.0",
     "typescript": "^4.6.3",

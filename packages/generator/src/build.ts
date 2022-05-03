@@ -77,6 +77,7 @@ export default function ssgBuild(): Plugin {
         logLevel: 'silent',
         build: {
           outDir: buildDir,
+          emptyOutDir: false,
           ssr: require.resolve('@blog/core/server.tsx'),
           rollupOptions: {
             output: {
