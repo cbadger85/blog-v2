@@ -2,15 +2,16 @@
   "$schema": "https://turborepo.org/schema.json",
   "baseBranch": "origin/main",
   "pipeline": {
-    "dev": {
-      "outputs": []
-    },
     "start": {
-      "dependsOn": ["dev"],
-      "outputs": []
+      "cache": false,
+      "dependsOn": ["dev"]
+    },
+    "dev": {
+      "cache": false
     },
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".generator/**"]
     },
     "test": {
       "outputs": [],

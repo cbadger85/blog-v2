@@ -5,8 +5,7 @@
     "./custom.d.ts",
     "./src/**/*.ts",
     "./src/**/*.tsx",
-    "./package.json",
-    "./vite.config.ts"
+    "./package.json"
   ],
   "exclude": ["node_modules"],
   "compilerOptions": {

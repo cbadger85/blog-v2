@@ -1,11 +1,5 @@
 {
   "extends": "@blog/tsconfig/base.json",
-  "include": [
-    "./global.d.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx",
-    "./package.json",
-    "./vite.config.ts"
-  ],
+  "include": ["./global.d.ts", "./src/**/*.ts", "./src/**/*.tsx", "./package.json"],
   "exclude": ["node_modules"]
 }

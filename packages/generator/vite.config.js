@@ -1,8 +1,7 @@
-/// <reference types="vitest" />
-
-import { defineConfig } from 'vite';
 import { builtinModules } from 'module';
-import pkg from './package.json';
+import { readFileSync } from 'fs';
+
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 const EXTERNALS = [
   ...builtinModules,
@@ -11,7 +10,10 @@ const EXTERNALS = [
   ...Object.keys(pkg.peerDependencies),
 ];
 
-export default defineConfig({
+/**
+ * @type {import('vitest').UserConfig}
+ */
+const config = {
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -30,4 +32,6 @@ export default defineConfig({
     reporters: 'verbose',
     setupFiles: ['./setupTests.ts'],
   },
-});
+};
+
+export default config;

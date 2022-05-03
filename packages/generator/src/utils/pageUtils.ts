@@ -14,7 +14,7 @@ export async function writePage(
   pageData: PageData,
   template: string,
 ): Promise<void> {
-  const filepath = path.join(root, 'build', url);
+  const filepath = path.join(root, '.generator/build', url);
 
   const htmlFilepath = ['/404', '/505'].includes(url)
     ? `${filepath}.html`

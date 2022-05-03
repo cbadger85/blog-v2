@@ -1,4 +1,3 @@
-import { promises as fsPromises } from 'fs';
 import { createRequire } from 'module';
 import path from 'path';
 import type { OutputChunk } from 'rollup';
@@ -11,13 +10,7 @@ const SSG_MODE = 'ssg';
 
 const require = createRequire(/* @vite-ignore */ import.meta.url);
 
-const rmAsync = fsPromises.rm;
-
 export default function ssgBuild(): Plugin {
-  const buildDir = path.join(path.dirname(require.resolve('@blog/generator')), '..', 'lib');
-  const serverFilename = 'server.js';
-  const serverFilepath = path.resolve(buildDir, serverFilename);
-
   let resolvedConfig: ResolvedConfig;
   let manifest: Record<string, { css: string[]; js: string }>;
 
@@ -35,6 +28,7 @@ export default function ssgBuild(): Plugin {
         ...config,
         build: {
           ...config.build,
+          outDir: '.generator/build',
           rollupOptions: {
             ...config.build?.rollupOptions,
             input: require.resolve('@blog/core/client.tsx'),
@@ -74,7 +68,9 @@ export default function ssgBuild(): Plugin {
         return;
       }
 
-      process.env.NODE_ENV = 'production';
+      const buildDir = path.join(resolvedConfig.root, '.generator');
+      const serverFilename = 'server.js';
+      const serverFilepath = path.resolve(buildDir, serverFilename);
 
       await build({
         mode: SSG_MODE,
@@ -117,12 +113,6 @@ export default function ssgBuild(): Plugin {
           );
         }),
       );
-
-      await clean(buildDir);
     },
   };
-}
-
-async function clean(dirpath: string) {
-  await rmAsync(path.join(dirpath), { recursive: true, force: true });
 }

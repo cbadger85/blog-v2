@@ -1,12 +1,12 @@
-/// <reference types="vitest" />
-
-import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import ssg from '@blog/generator';
 
-export default defineConfig({
+/**
+ * @type {import('vite').UserConfig}
+ */
+const config = {
   plugins: [
     react(),
     tsconfigPaths(),
@@ -21,7 +21,6 @@ export default defineConfig({
     ssg(),
   ],
   build: {
-    outDir: 'build',
     emptyOutDir: true,
   },
   server: {
@@ -33,4 +32,6 @@ export default defineConfig({
     reporters: 'verbose',
     setupFiles: ['./setupTests.ts'],
   },
-});
+};
+
+export default config;

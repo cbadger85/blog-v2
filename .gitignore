@@ -9,6 +9,7 @@ node_modules/
 
 coverage/
 
+.generator/
 build/
 dist/
 lib/
