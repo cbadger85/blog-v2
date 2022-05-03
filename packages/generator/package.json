@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
-    "start": "vite dev",
+    "start": "vite build --watch",
     "test": "vitest --mode test",
     "test:coverage": "vitest run --mode test --coverage",
     "typecheck": "tsc"
