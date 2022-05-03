@@ -1,6 +1,5 @@
 import checker from 'vite-plugin-checker';
 import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import ssg from '@blog/generator';
 
 /**
@@ -9,7 +8,6 @@ import ssg from '@blog/generator';
 const config = {
   plugins: [
     react(),
-    tsconfigPaths(),
     {
       ...checker({
         overlay: false,
