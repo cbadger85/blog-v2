@@ -7,10 +7,10 @@
   "main": "index.js",
   "scripts": {
     "build": "vite build",
+    "start": "vite dev",
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "serve": "vite preview --port 3000",
-    "start": "vite dev",
     "test": "vitest --mode test",
     "test:coverage": "vitest run --mode test --coverage",
     "typecheck": "tsc"
