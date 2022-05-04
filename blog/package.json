@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "description": "My blog, yo",
   "type": "module",
-  "main": "index.js",
+  "main": ".generator/build/index.html",
   "scripts": {
     "build": "vite build",
     "start": "vite dev",

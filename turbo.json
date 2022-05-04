@@ -6,6 +6,10 @@
       "dependsOn": ["@blog/generator#build"],
       "cache": false
     },
+    "serve": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".generator/**"]

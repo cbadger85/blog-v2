@@ -3,7 +3,6 @@ import { createWriteStream, promises as fsPromises } from 'fs';
 import path from 'path';
 import type { PipeableStream } from 'react-dom/server';
 import type { HelmetServerState } from 'react-helmet-async';
-import { hydrateTemplate } from './templateUtils';
 
 const { writeFile: writeFileAsync, mkdir: mkdirAsync } = fsPromises;
 
@@ -12,7 +11,7 @@ export async function writePage(
   pathToServerFile: string,
   url: string,
   pageData: PageData,
-  template: string,
+  // template: string,
 ): Promise<void> {
   const filepath = path.join(root, '.generator/build', url);
 
@@ -27,7 +26,7 @@ export async function writePage(
       path: url,
     },
     pageData,
-    template,
+    // template,
   ).then(() => console.log(path.relative(root, htmlFilepath)));
 
   await htmlFile;
@@ -64,10 +63,8 @@ async function writeHtmlFile(
   pathToServerFile: string,
   pageInfo: PageInfo,
   { preloadedData, initialProps }: PageData,
-  template: string,
-): Promise<void> {
-  await createDir(pageInfo.filepath);
-
+): // template: string,
+Promise<void> {
   const { render } = await import(pathToServerFile);
 
   return new Promise((resolve, reject) => {
@@ -80,14 +77,14 @@ async function writeHtmlFile(
         if (err !== null) {
           reject(err);
         }
-        const [header, body] = hydrateTemplate(template, helmetData, {
-          preloadedData,
-          initialProps,
-        }).split('<!--ssr-->');
+        // const [header, body] = hydrateTemplate(template, helmetData, {
+        //   preloadedData,
+        //   initialProps,
+        // }).split('<!--ssr-->');
 
-        htmlWriteStream.write(header, 'utf-8');
+        // htmlWriteStream.write(header, 'utf-8');
         pipe(htmlWriteStream);
-        htmlWriteStream.write(body);
+        // htmlWriteStream.write(body);
         htmlWriteStream.end();
       },
     );

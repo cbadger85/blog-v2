@@ -4,7 +4,7 @@ import type { PipeableStream } from 'react-dom/server';
 import type { HelmetServerState } from 'react-helmet-async';
 import { Plugin } from 'vite';
 import { getUrlToPageAssets } from './utils/routeUtils';
-import { buildTemplate, hydrateTemplate } from './utils/templateUtils';
+import { buildHtmlPage, hydrateHelmetData } from './utils/templateUtils';
 
 const require = createRequire(/* @vite-ignore */ import.meta.url);
 
@@ -14,16 +14,11 @@ export default function ssgDev(): Plugin {
     apply: 'serve',
 
     configureServer(server) {
-      return () => {
+      return async () => {
         server.middlewares.use(async (req, res, next) => {
           const url = req.originalUrl as string;
 
           try {
-            const template = await server.transformIndexHtml(
-              url,
-              buildTemplate(require.resolve('@blog/core/client.tsx').substring(1)),
-            );
-
             const { render, preloader, routes } = await server.ssrLoadModule(
               require.resolve('@blog/core/server.tsx'),
             );
@@ -49,18 +44,25 @@ export default function ssgDev(): Plugin {
 
             const preloadedData = await preloader();
 
+            const template = await server.transformIndexHtml(
+              url,
+              buildHtmlPage({
+                preloadedData,
+                initialProps,
+                entryScript: require.resolve('@blog/core/client.tsx').substring(1),
+                css: [],
+              }),
+            );
+
             render(
               url,
               { preloadedData, initialProps },
               ({ pipe }: PipeableStream, helmetData: HelmetServerState, err: unknown) => {
                 if (err !== null) {
-                  console.error(err);
+                  throw err;
                 }
 
-                const [header, body] = hydrateTemplate(template, helmetData, {
-                  preloadedData,
-                  initialProps,
-                }).split('<!--ssr-->');
+                const [header, body] = hydrateHelmetData(template, helmetData).split('<!--ssr-->');
 
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/html');

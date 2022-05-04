@@ -2,9 +2,7 @@ import { createRequire } from 'module';
 import path from 'path';
 import type { OutputChunk } from 'rollup';
 import { build, Plugin, ResolvedConfig } from 'vite';
-import { writePage } from './utils/pageUtils';
-import { getUrlToPageAssets } from './utils/routeUtils';
-import { buildTemplate } from './utils/templateUtils';
+import { generatePages } from './generatePages';
 
 const SSG_MODE = 'ssg';
 
@@ -87,33 +85,7 @@ export default function ssgBuild(): Plugin {
         },
       });
 
-      const { preloader, routes } = await import(serverFilepath);
-
-      const preloadedData = await preloader();
-
-      const urlToGetStaticProps = await getUrlToPageAssets(routes, manifest, resolvedConfig.root);
-
-      const baseAssets = manifest[require.resolve('@blog/core/client.tsx')];
-
-      await Promise.all(
-        Object.entries(urlToGetStaticProps).map(async ([url, assets]) => {
-          const initialProps = (await assets?.getStaticProps()) || {};
-
-          const template = buildTemplate(
-            baseAssets.js,
-            [...baseAssets.css, ...(assets?.css || [])],
-            assets?.js,
-          );
-
-          await writePage(
-            resolvedConfig.root,
-            serverFilepath,
-            url,
-            { preloadedData, initialProps },
-            template,
-          );
-        }),
-      );
+      await generatePages(resolvedConfig.root, serverFilepath, manifest);
     },
   };
 }

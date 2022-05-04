@@ -3,6 +3,9 @@ import type { HelmetServerState } from 'react-helmet-async';
 interface TemplateData {
   preloadedData: unknown;
   initialProps: unknown;
+  entryScript: string;
+  css: string[];
+  js?: string;
 }
 
 const SSG_DATA = '<!--ssr-data-->';
@@ -12,20 +15,28 @@ const SSG_META = '<!--ssr-meta-->';
 const SSG_LINK = '<!--ssr-link-->';
 const SSG_BODY_ATTRIBUTES = 'data-ssr-body-attributes';
 
-export function buildTemplate(entrypoint: string, css?: string[], js?: string): string {
-  return `
+export function buildHtmlPage({
+  preloadedData,
+  initialProps,
+  entryScript,
+  css,
+  js,
+}: TemplateData): string {
+  const contextScript =
+    `<script>(function() { ` +
+    `window.__PRELOADED_DATA__ = ${JSON.stringify(preloadedData)}; ` +
+    `window.__INITIAL_PROPS__ = ${JSON.stringify(initialProps)} ` +
+    `})()</script>`;
+
+  const template = `
   <!DOCTYPE html>
   <html ${SSG_HTML_ATTRIBUTES}>
     <head>
       ${SSG_TITLE}
       ${SSG_META}
       ${SSG_LINK}
-      ${
-        css
-          ? css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet"></link>`).join('')
-          : ''
-      }
-      <script type="module" crossorigin src="/${entrypoint}"></script>
+      ${css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet"></link>`).join('')}
+      <script type="module" crossorigin src="/${entryScript}"></script>
       ${js ? `<script type="module" crossorigin src="/${js}"></script>` : ''}
     </head>
     <body ${SSG_BODY_ATTRIBUTES}>
@@ -34,21 +45,12 @@ export function buildTemplate(entrypoint: string, css?: string[], js?: string): 
     </body>
   </html>
   `;
+
+  return template.replace(SSG_DATA, contextScript);
 }
 
-export function hydrateTemplate(
-  template: string,
-  helmetData: HelmetServerState,
-  { preloadedData, initialProps }: TemplateData,
-): string {
-  const contextScript =
-    `<script>(function() { ` +
-    `window.__PRELOADED_DATA__ = ${JSON.stringify(preloadedData)}; ` +
-    `window.__INITIAL_PROPS__ = ${JSON.stringify(initialProps)} ` +
-    `})()</script>`;
-
+export function hydrateHelmetData(template: string, helmetData: HelmetServerState) {
   return template
-    .replace(SSG_DATA, contextScript)
     .replace(SSG_HTML_ATTRIBUTES, helmetData.htmlAttributes.toString())
     .replace(SSG_TITLE, helmetData.title.toString())
     .replace(SSG_META, helmetData.meta.toString())
