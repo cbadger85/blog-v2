@@ -1,107 +1,65 @@
-/* eslint-disable no-console */
-import { createWriteStream, promises as fsPromises } from 'fs';
-import path from 'path';
-import type { PipeableStream } from 'react-dom/server';
-import type { HelmetServerState } from 'react-helmet-async';
+import type { RouteConfig } from '@blog/core';
 
-const { writeFile: writeFileAsync, mkdir: mkdirAsync } = fsPromises;
-
-export async function writePage(
-  root: string,
-  pathToServerFile: string,
-  url: string,
-  pageData: PageData,
-  // template: string,
-): Promise<void> {
-  const filepath = path.join(root, '.generator/build', url);
-
-  const htmlFilepath = ['/404', '/505'].includes(url)
-    ? `${filepath}.html`
-    : path.join(filepath, 'index.html');
-
-  const htmlFile = writeHtmlFile(
-    pathToServerFile,
-    {
-      filepath: htmlFilepath,
-      path: url,
-    },
-    pageData,
-    // template,
-  ).then(() => console.log(path.relative(root, htmlFilepath)));
-
-  await htmlFile;
-
-  if (!pageData.initialProps) {
-    await htmlFile;
-  } else {
-    const jsonFilepath = path.join(filepath, 'index.json');
-
-    const jsonFile = writeJsonFile(jsonFilepath, pageData.initialProps).then(() =>
-      console.log(path.relative(root, jsonFilepath)),
-    );
-
-    await Promise.all([htmlFile, jsonFile]);
-  }
-}
-
-async function writeJsonFile(filepath: string, initialProps: unknown): Promise<void> {
-  await createDir(filepath);
-  await writeFileAsync(filepath, JSON.stringify(initialProps || {}));
-}
-
-interface PageData {
-  preloadedData: unknown;
-  initialProps: unknown;
-}
-
-interface PageInfo {
-  path: string;
-  filepath: string;
-}
-
-async function writeHtmlFile(
-  pathToServerFile: string,
-  pageInfo: PageInfo,
-  { preloadedData, initialProps }: PageData,
-): // template: string,
-Promise<void> {
-  const { render } = await import(pathToServerFile);
-
-  return new Promise((resolve, reject) => {
-    const htmlWriteStream = createWriteStream(pageInfo.filepath);
-
-    render(
-      pageInfo.path,
-      { preloadedData, initialProps },
-      ({ pipe }: PipeableStream, helmetData: HelmetServerState, err: unknown) => {
-        if (err !== null) {
-          reject(err);
+function getUrlFromSourcepath(
+  sourcepath: string,
+  params: Record<string, string | string[]>,
+): string {
+  return (
+    Object.entries(params).reduce(
+      (url, [key, param]) => {
+        if (Array.isArray(param)) {
+          return url.replace(`[...${key}]`, param.join('/'));
         }
-        // const [header, body] = hydrateTemplate(template, helmetData, {
-        //   preloadedData,
-        //   initialProps,
-        // }).split('<!--ssr-->');
-
-        // htmlWriteStream.write(header, 'utf-8');
-        pipe(htmlWriteStream);
-        // htmlWriteStream.write(body);
-        htmlWriteStream.end();
+        return url.replace(`[${key}]`, param);
       },
-    );
-
-    htmlWriteStream.on('error', (e: Error) => {
-      console.error(e);
-      reject(e);
-    });
-
-    htmlWriteStream.on('finish', () => {
-      resolve();
-    });
-  });
+      sourcepath
+        .replace(/\.(tsx|ts|jsx|js)/, '')
+        .replace(/^(.*?)src\/pages/, '')
+        .replace(/\/index$/, ''),
+    ) || '/'
+  );
 }
 
-async function createDir(filepath: string) {
-  const dirname = path.dirname(filepath);
+export interface ManifestDetails {
+  css: string[];
+  js: string;
+}
 
-  await mkdirAsync(dirname, { recursive: true }).catch((e) => console.error(e));
+export type Mainfest = Record<string, ManifestDetails>;
+
+export interface PageAssets {
+  getStaticProps: () => Promise<unknown>;
+  css: string[];
+  js: string;
+}
+
+export async function getUrlToPageAssets(
+  routes: RouteConfig[],
+  manifest: Mainfest,
+  rootPath: string,
+): Promise<Record<string, PageAssets | undefined>> {
+  const entriesLists: [string, PageAssets][][] = await Promise.all(
+    routes.map(async (route) => {
+      const paramsList = (await route.getStaticPaths?.()) || [];
+
+      const filepath = (await import('path')).resolve(rootPath, route.sourcepath);
+
+      const assets = manifest[filepath];
+
+      if (paramsList.length) {
+        return paramsList.map<[string, PageAssets]>((params) => {
+          const pathname = getUrlFromSourcepath(route.sourcepath, params);
+          const getStaticProps = () =>
+            route.getStaticProps?.({ params, pathname }) || Promise.resolve({});
+          return [pathname, { getStaticProps, ...assets }];
+        });
+      }
+      const pathname = getUrlFromSourcepath(route.sourcepath, {});
+      const getStaticProps = () =>
+        route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({});
+      return [[pathname, { getStaticProps, ...assets }]];
+    }),
+  );
+
+  return Object.fromEntries(entriesLists.flat());
 }

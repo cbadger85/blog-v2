@@ -1,10 +1,9 @@
 /* eslint-disable no-console */
 import { createRequire } from 'module';
-import type { PipeableStream } from 'react-dom/server';
-import type { HelmetServerState } from 'react-helmet-async';
 import { Plugin } from 'vite';
-import { getUrlToPageAssets } from './utils/routeUtils';
-import { buildHtmlPage, hydrateHelmetData } from './utils/templateUtils';
+import { renderToStream } from './utils/streamUtils';
+import { getUrlToPageAssets } from './utils/pageUtils';
+import { buildHtmlPage } from './utils/templateUtils';
 
 const require = createRequire(/* @vite-ignore */ import.meta.url);
 
@@ -54,24 +53,9 @@ export default function ssgDev(): Plugin {
               }),
             );
 
-            render(
-              url,
-              { preloadedData, initialProps },
-              ({ pipe }: PipeableStream, helmetData: HelmetServerState, err: unknown) => {
-                if (err !== null) {
-                  throw err;
-                }
-
-                const [header, body] = hydrateHelmetData(template, helmetData).split('<!--ssr-->');
-
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'text/html');
-                res.write(header);
-                pipe(res);
-                res.write(body);
-                res.end();
-              },
-            );
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html');
+            renderToStream(res, render, { url, initialProps, preloadedData, template });
           } catch (e: unknown) {
             if (e instanceof Error) {
               server.ssrFixStacktrace(e);
