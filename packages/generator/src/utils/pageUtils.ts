@@ -1,4 +1,5 @@
 import type { RouteConfig } from '@blog/core';
+import { matchRoutes } from 'react-router-dom';
 
 function getUrlFromSourcepath(
   sourcepath: string,
@@ -40,26 +41,53 @@ export async function getUrlToPageAssets(
 ): Promise<Record<string, PageAssets | undefined>> {
   const entriesLists: [string, PageAssets][][] = await Promise.all(
     routes.map(async (route) => {
-      const paramsList = (await route.getStaticPaths?.()) || [];
-
       const filepath = (await import('path')).resolve(rootPath, route.sourcepath);
 
       const assets = manifest[filepath];
 
-      if (paramsList.length) {
-        return paramsList.map<[string, PageAssets]>((params) => {
-          const pathname = getUrlFromSourcepath(route.sourcepath, params);
-          const getStaticProps = () =>
-            route.getStaticProps?.({ params, pathname }) || Promise.resolve({});
-          return [pathname, { getStaticProps, ...assets }];
-        });
-      }
-      const pathname = getUrlFromSourcepath(route.sourcepath, {});
-      const getStaticProps = () =>
-        route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({});
-      return [[pathname, { getStaticProps, ...assets }]];
+      const paramsList = (await route.getStaticPaths?.()) || [];
+
+      return urlToPageAssetFromStaticProps(route, paramsList, assets);
     }),
   );
 
   return Object.fromEntries(entriesLists.flat());
+}
+
+export async function loadStaticProps(url: string, routes: RouteConfig[]): Promise<unknown> {
+  const match = matchRoutes(routes, url)?.[0];
+
+  if (!match) {
+    return {};
+  }
+
+  const matchedRoute = match.route as RouteConfig;
+
+  const paramsList = (await matchedRoute.getStaticPaths?.()) || [];
+
+  const urlToPageAssets = Object.fromEntries(
+    urlToPageAssetFromStaticProps(matchedRoute, paramsList),
+  );
+
+  return urlToPageAssets[url]?.getStaticProps?.();
+}
+
+function urlToPageAssetFromStaticProps(
+  route: RouteConfig,
+  paramsList: Record<string, string | string[]>[],
+  assets: ManifestDetails = { css: [], js: '' },
+): [string, PageAssets][] {
+  if (paramsList.length) {
+    return paramsList.map<[string, PageAssets]>((params) => {
+      const pathname = getUrlFromSourcepath(route.sourcepath, params);
+      const getStaticProps = () =>
+        route.getStaticProps?.({ params, pathname }) || Promise.resolve({});
+      return [pathname, { getStaticProps, ...assets }];
+    });
+  }
+
+  const pathname = getUrlFromSourcepath(route.sourcepath, {});
+  const getStaticProps = () =>
+    route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({});
+  return [[pathname, { getStaticProps, ...assets }]];
 }

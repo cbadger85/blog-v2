@@ -2,7 +2,7 @@
 import { createRequire } from 'module';
 import { Plugin } from 'vite';
 import { renderToStream } from './utils/streamUtils';
-import { getUrlToPageAssets } from './utils/pageUtils';
+import { loadStaticProps } from './utils/pageUtils';
 import { buildHtmlPage } from './utils/templateUtils';
 
 const require = createRequire(/* @vite-ignore */ import.meta.url);
@@ -13,7 +13,7 @@ export default function ssgDev(): Plugin {
     apply: 'serve',
 
     configureServer(server) {
-      return async () => {
+      return () => {
         server.middlewares.use(async (req, res, next) => {
           const url = req.originalUrl as string;
 
@@ -22,11 +22,10 @@ export default function ssgDev(): Plugin {
               require.resolve('@blog/core/server.tsx'),
             );
 
-            const urlToGetStaticProps = await getUrlToPageAssets(routes, {}, process.cwd());
-
-            const initialProps = await urlToGetStaticProps[
-              url === '/index.json' ? '/' : url.replace('/index.json', '')
-            ]?.getStaticProps?.();
+            const initialProps = await loadStaticProps(
+              url === '/index.json' ? '/' : url.replace('/index.json', ''),
+              routes,
+            );
 
             if (url.endsWith('index.json')) {
               if (initialProps) {
