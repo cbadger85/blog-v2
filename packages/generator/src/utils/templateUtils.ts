@@ -8,12 +8,14 @@ interface TemplateData {
   js?: string;
 }
 
-const SSG_DATA = '<!--ssr-data-->';
-const SSG_HTML_ATTRIBUTES = 'data-ssr-html-attributes';
-const SSG_TITLE = '<!--ssr-title-->';
-const SSG_META = '<!--ssr-meta-->';
-const SSG_LINK = '<!--ssr-link-->';
-const SSG_BODY_ATTRIBUTES = 'data-ssr-body-attributes';
+const SSG_DATA = '<!--ssg-data-->';
+const SSG_HTML_ATTRIBUTES = 'data-ssg-html-attributes';
+const SSG_TITLE = '<!--ssg-title-->';
+const SSG_META = '<!--ssg-meta-->';
+const SSG_LINK = '<!--ssg-link-->';
+const SSG_SCRIPT = '<!--ssg-script-->';
+const SSG_BODY_ATTRIBUTES = 'data-ssg-body-attributes';
+export const SSG_DIVIDER = '<!--ssg-->';
 
 export function buildHtmlPage({
   preloadedData,
@@ -36,12 +38,13 @@ export function buildHtmlPage({
       ${SSG_META}
       ${SSG_LINK}
       ${css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet">`).join('')}
+      ${SSG_SCRIPT}
       <script type="module" crossorigin src="/${entryScript}"></script>
       ${js ? `<script type="module" crossorigin src="/${js}"></script>` : ''}
       <link href="/manifest.json" rel="manifest">
     </head>
     <body ${SSG_BODY_ATTRIBUTES}>
-      <div id="root"><!--ssr--></div>
+      <div id="root">${SSG_DIVIDER}</div>
       ${SSG_DATA}
     </body>
   </html>
@@ -56,5 +59,6 @@ export function hydrateHelmetData(template: string, helmetData: HelmetServerStat
     .replace(SSG_TITLE, helmetData.title.toString())
     .replace(SSG_META, helmetData.meta.toString())
     .replace(SSG_LINK, helmetData.link.toString())
+    .replace(SSG_SCRIPT, helmetData.script.toString())
     .replace(SSG_BODY_ATTRIBUTES, helmetData.bodyAttributes.toString());
 }

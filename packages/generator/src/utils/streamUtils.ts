@@ -1,7 +1,7 @@
 import type { render } from '@blog/core/server';
 import { WriteStream } from 'fs';
 import { ServerResponse } from 'http';
-import { hydrateHelmetData } from './templateUtils';
+import { hydrateHelmetData, SSG_DIVIDER } from './templateUtils';
 
 export type RenderFn = typeof render;
 
@@ -28,7 +28,7 @@ export function renderToStream(
         throw err;
       }
 
-      const [header, body] = hydrateHelmetData(details.template, helmetData).split('<!--ssr-->');
+      const [header, body] = hydrateHelmetData(details.template, helmetData).split(SSG_DIVIDER);
 
       stream.write(header);
       pipe(stream);
