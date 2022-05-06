@@ -88,14 +88,14 @@ export default function ssgBuild(): Plugin {
 
       const { routes, preloader, render } = await import(serverFilepath);
 
-      const urlToGetStaticProps = await getUrlToPageAssets(routes, manifest, resolvedConfig.root);
+      const urlToPageAssets = await getUrlToPageAssets(routes, manifest, resolvedConfig.root);
 
       const baseAssets = manifest[require.resolve('@blog/core/client.tsx')];
 
       const preloadedData = await preloader();
 
       await Promise.all(
-        Object.entries(urlToGetStaticProps).map(([url, assets]) =>
+        Object.entries(urlToPageAssets).map(([url, assets]) =>
           writePageFiles(resolvedConfig.root, render, { url, baseAssets, assets, preloadedData }),
         ),
       );

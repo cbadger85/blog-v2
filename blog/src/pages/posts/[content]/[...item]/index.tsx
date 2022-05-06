@@ -1,21 +1,24 @@
-import { PagePropsFromStaticProps } from '@blog/core';
+import { PagePropsFromStaticProps, StaticPropsContext } from '@blog/core';
 
 export function getStaticPaths() {
   return [
     {
       item: ['foo', 'bar'],
+      content: 'content',
     },
     {
       item: ['baz', 'zoo'],
+      content: 'content',
     },
     {
       item: ['a', 'b', 'c'],
+      content: 'content',
     },
   ];
 }
 
-export function getStaticProps(ctx: { params: Record<string, string | string[]> }) {
-  return { item: ctx?.params.item };
+export function getStaticProps(ctx: StaticPropsContext) {
+  return { item: ctx.params.item };
 }
 
 export default function Post({ item }: PagePropsFromStaticProps<typeof getStaticProps>) {

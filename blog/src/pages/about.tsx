@@ -1,8 +1,8 @@
-import { Link, PagePropsFromStaticProps } from '@blog/core';
+import { Link, PagePropsFromStaticProps, StaticPropsContext } from '@blog/core';
 import crypto from 'crypto';
 import styles from './about.module.css';
 
-export function getStaticProps() {
+export function getStaticProps(_ctx: StaticPropsContext) {
   return { foo: crypto.randomBytes(48).toString('hex') };
 }
 

@@ -10,7 +10,7 @@ export function getStaticPaths() {
 }
 
 export function getStaticProps(ctx: StaticPropsContext) {
-  return { slug: ctx?.params.slug };
+  return { slug: ctx.params.slug };
 }
 
 export default function Post({ slug }: PagePropsFromStaticProps<typeof getStaticProps>) {

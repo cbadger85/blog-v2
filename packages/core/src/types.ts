@@ -20,7 +20,10 @@ export interface RouteConfig {
 }
 
 export interface StaticPropsContext<
-  T extends Record<string, string | string[]> = Record<string, string | string[]>,
+  T extends Record<string, string | string[] | undefined> = Record<
+    string,
+    string | string[] | undefined
+  >,
 > {
   params: T;
   pathname: string;

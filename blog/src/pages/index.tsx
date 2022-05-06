@@ -1,6 +1,6 @@
-import { Link, PagePropsFromStaticProps } from '@blog/core';
+import { Link, PagePropsFromStaticProps, StaticPropsContext } from '@blog/core';
 
-export function getStaticProps() {
+export function getStaticProps(_ctx: StaticPropsContext) {
   return { foo: 'bar' };
 }
 

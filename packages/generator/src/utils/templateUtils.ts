@@ -35,9 +35,10 @@ export function buildHtmlPage({
       ${SSG_TITLE}
       ${SSG_META}
       ${SSG_LINK}
-      ${css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet"></link>`).join('')}
+      ${css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet">`).join('')}
       <script type="module" crossorigin src="/${entryScript}"></script>
       ${js ? `<script type="module" crossorigin src="/${js}"></script>` : ''}
+      <link href="/manifest.json" rel="manifest">
     </head>
     <body ${SSG_BODY_ATTRIBUTES}>
       <div id="root"><!--ssr--></div>

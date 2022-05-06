@@ -41,7 +41,7 @@ export async function getUrlToPageAssets(
 ): Promise<Record<string, PageAssets | undefined>> {
   const entriesLists: [string, PageAssets][][] = await Promise.all(
     routes.map(async (route) => {
-      const filepath = (await import('path')).resolve(rootPath, route.sourcepath);
+      const filepath = (await import('path')).join(rootPath, route.sourcepath);
 
       const assets = manifest[filepath];
 
@@ -69,7 +69,7 @@ export async function loadStaticProps(url: string, routes: RouteConfig[]): Promi
     urlToPageAssetFromStaticProps(matchedRoute, paramsList),
   );
 
-  return urlToPageAssets[url]?.getStaticProps?.();
+  return urlToPageAssets[url]?.getStaticProps() || {};
 }
 
 function urlToPageAssetFromStaticProps(
@@ -80,14 +80,14 @@ function urlToPageAssetFromStaticProps(
   if (paramsList.length) {
     return paramsList.map<[string, PageAssets]>((params) => {
       const pathname = getUrlFromSourcepath(route.sourcepath, params);
-      const getStaticProps = () =>
-        route.getStaticProps?.({ params, pathname }) || Promise.resolve({});
+      const getStaticProps = async () => {
+        return route.getStaticProps?.({ params, pathname }) || {};
+      };
       return [pathname, { getStaticProps, ...assets }];
     });
   }
 
   const pathname = getUrlFromSourcepath(route.sourcepath, {});
-  const getStaticProps = () =>
-    route.getStaticProps?.({ params: {}, pathname }) || Promise.resolve({});
+  const getStaticProps = async () => route.getStaticProps?.({ params: {}, pathname }) || {};
   return [[pathname, { getStaticProps, ...assets }]];
 }
