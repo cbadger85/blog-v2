@@ -1,4 +1,5 @@
 import type { HelmetServerState } from 'react-helmet-async';
+import { html } from 'common-tags';
 
 interface TemplateData {
   preloadedData: unknown;
@@ -30,27 +31,23 @@ export function buildHtmlPage({
     `window.__INITIAL_PROPS__ = ${JSON.stringify(initialProps)} ` +
     `})()</script>`;
 
-  const template = `
-  <!DOCTYPE html>
-  <html ${SSG_HTML_ATTRIBUTES}>
-    <head>
-      ${SSG_TITLE}
-      ${SSG_META}
-      ${SSG_LINK}
-      ${css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet">`).join('')}
-      ${SSG_SCRIPT}
-      <script type="module" crossorigin src="/${entryScript}"></script>
-      ${js ? `<script type="module" crossorigin src="/${js}"></script>` : ''}
-      <link href="/manifest.json" rel="manifest">
-    </head>
-    <body ${SSG_BODY_ATTRIBUTES}>
-      <div id="root">${SSG_DIVIDER}</div>
-      ${SSG_DATA}
-    </body>
-  </html>
-  `;
-
-  return template.replace(SSG_DATA, contextScript);
+  return html`
+    <!DOCTYPE html>
+    <html ${SSG_HTML_ATTRIBUTES}>
+      <head>
+        ${SSG_TITLE} ${SSG_META} ${SSG_LINK}
+        ${css.map((stylesheet) => `<link href="/${stylesheet}" rel="stylesheet">`).join('')}
+        ${SSG_SCRIPT}
+        <script type="module" crossorigin src="/${entryScript}"></script>
+        ${js ? `<script type="module" crossorigin src="/${js}"></script>` : ''}
+        <link href="/manifest.json" rel="manifest" />
+      </head>
+      <body ${SSG_BODY_ATTRIBUTES}>
+        <div id="root">${SSG_DIVIDER}</div>
+        ${SSG_DATA}
+      </body>
+    </html>
+  `.replace(SSG_DATA, contextScript);
 }
 
 export function hydrateHelmetData(template: string, helmetData: HelmetServerState) {
