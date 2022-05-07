@@ -8,7 +8,7 @@ export interface AppProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PagePropsFromStaticProps<T extends (...args: any[]) => any> = ReturnType<T>;
+export type FromStaticProps<T extends (...args: any[]) => any> = Awaited<ReturnType<T>>;
 
 export interface RouteConfig {
   path: string;

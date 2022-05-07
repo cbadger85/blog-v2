@@ -1,10 +1,10 @@
-import { Link, PagePropsFromStaticProps, StaticPropsContext } from '@blog/core';
+import { Link, FromStaticProps, StaticPropsContext } from '@blog/core';
 
 export function getStaticProps(_ctx: StaticPropsContext) {
   return { foo: 'bar' };
 }
 
-export default function Home(props: PagePropsFromStaticProps<typeof getStaticProps>) {
+export default function Home(props: FromStaticProps<typeof getStaticProps>) {
   return (
     <div>
       <h1>HOME</h1>

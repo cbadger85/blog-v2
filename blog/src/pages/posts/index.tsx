@@ -1,16 +1,21 @@
-import { Link } from '@blog/core';
+import { Link, FromStaticProps } from '@blog/core';
 
-export default function Posts() {
+export async function getStaticProps() {
+  const { getPosts } = await import('../../content');
+  const posts = await getPosts();
+  return { slugs: Object.keys(posts) };
+}
+
+export default function Posts({ slugs }: FromStaticProps<typeof getStaticProps>) {
   return (
     <div>
       <h1>List of Posts</h1>
       <ul>
-        <li>
-          <Link to="/posts/first-post">First Post</Link>
-        </li>
-        <li>
-          <Link to="/posts/second-post">Second Post</Link>
-        </li>
+        {slugs.map((slug) => (
+          <li key={slug}>
+            <Link to={`/posts/${slug}`}>{slug}</Link>
+          </li>
+        ))}
       </ul>
     </div>
   );

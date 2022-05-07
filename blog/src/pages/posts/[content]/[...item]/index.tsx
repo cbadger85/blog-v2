@@ -1,4 +1,4 @@
-import { PagePropsFromStaticProps, StaticPropsContext } from '@blog/core';
+import { FromStaticProps, StaticPropsContext } from '@blog/core';
 
 export function getStaticPaths() {
   return [
@@ -21,6 +21,6 @@ export function getStaticProps(ctx: StaticPropsContext) {
   return { item: ctx.params.item };
 }
 
-export default function Post({ item }: PagePropsFromStaticProps<typeof getStaticProps>) {
+export default function Post({ item }: FromStaticProps<typeof getStaticProps>) {
   return <div>{Array.isArray(item) ? item.join(', ') : item}</div>;
 }

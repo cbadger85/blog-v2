@@ -8,9 +8,4 @@ export {
   type HelmetProps as HeadProps,
 } from 'react-helmet-async';
 
-export type {
-  AppProps,
-  PagePropsFromStaticProps,
-  RouteConfig,
-  StaticPropsContext,
-} from './src/types';
+export type { AppProps, FromStaticProps, RouteConfig, StaticPropsContext } from './src/types';

@@ -1,6 +1,7 @@
 import checker from 'vite-plugin-checker';
 import react from '@vitejs/plugin-react';
 import ssg from '@blog/generator';
+import mdx from '@mdx-js/rollup';
 
 /**
  * @type {import('vite').UserConfig}
@@ -16,10 +17,14 @@ const config = {
       }),
       apply: 'serve',
     },
+    mdx({ remarkPlugins: [] }),
     ssg(),
   ],
   build: {
     emptyOutDir: true,
+  },
+  optimizeDeps: {
+    include: ['react/jsx-runtime'],
   },
   server: {
     open: true,
