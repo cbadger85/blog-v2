@@ -1,6 +1,19 @@
 import type { RouteConfig } from '@blog/core';
 import { matchRoutes } from 'react-router-dom';
 
+export interface ManifestDetails {
+  css: string[];
+  js: string;
+}
+
+export type Manifest = Record<string, ManifestDetails>;
+
+export interface PageAssets {
+  getStaticProps: () => Promise<unknown>;
+  css: string[];
+  js: string;
+}
+
 function getUrlFromSourcepath(
   sourcepath: string,
   params: Record<string, string | string[]>,
@@ -21,22 +34,9 @@ function getUrlFromSourcepath(
   );
 }
 
-export interface ManifestDetails {
-  css: string[];
-  js: string;
-}
-
-export type Mainfest = Record<string, ManifestDetails>;
-
-export interface PageAssets {
-  getStaticProps: () => Promise<unknown>;
-  css: string[];
-  js: string;
-}
-
 export async function getUrlToPageAssets(
   routes: RouteConfig[],
-  manifest: Mainfest,
+  manifest: Manifest,
   rootPath: string,
 ): Promise<Record<string, PageAssets | undefined>> {
   const entriesLists: [string, PageAssets][][] = await Promise.all(

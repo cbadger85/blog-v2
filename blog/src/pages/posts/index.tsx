@@ -2,8 +2,8 @@ import { Link, FromStaticProps } from '@blog/core';
 
 export async function getStaticProps() {
   const { getPosts } = await import('../../content');
-  const posts = await getPosts();
-  return { slugs: Object.keys(posts) };
+  const posts = getPosts();
+  return { slugs: posts };
 }
 
 export default function Posts({ slugs }: FromStaticProps<typeof getStaticProps>) {

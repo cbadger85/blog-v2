@@ -3,7 +3,7 @@ import path from 'path';
 import type { OutputChunk } from 'rollup';
 import { build, Plugin, ResolvedConfig } from 'vite';
 import { writePageFiles } from './utils/fileUtils';
-import { getUrlToPageAssets } from './utils/pageUtils';
+import { getUrlToPageAssets, Manifest } from './utils/pageUtils';
 
 const SSG_MODE = 'ssg';
 
@@ -11,36 +11,18 @@ const require = createRequire(/* @vite-ignore */ import.meta.url);
 
 export default function ssgBuild(): Plugin {
   let resolvedConfig: ResolvedConfig;
-  let manifest: Record<string, { css: string[]; js: string }>;
+  let manifest: Manifest;
 
   return {
     name: 'ssg:build',
     apply: 'build',
     enforce: 'post',
 
-    config(config) {
-      if (config.mode === SSG_MODE) {
-        return config;
-      }
-
-      return {
-        ...config,
-        build: {
-          ...config.build,
-          outDir: '.generator/build',
-          rollupOptions: {
-            ...config.build?.rollupOptions,
-            input: require.resolve('@blog/core/client.tsx'),
-          },
-        },
-      };
-    },
-
     configResolved(config) {
       resolvedConfig = config;
     },
 
-    generateBundle(_options, bundle) {
+    generateBundle(options, bundle) {
       if (resolvedConfig.mode === SSG_MODE) {
         return;
       }
@@ -52,7 +34,7 @@ export default function ssgBuild(): Plugin {
             const chunk = output as OutputChunk;
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { importedCss } = (chunk as any)?.viteMetadata || {};
+            const { importedCss } = (chunk as any)?.viteMetadata || {}; // TODO: See what other values this has in it.
 
             return [
               chunk.facadeModuleId,
@@ -73,7 +55,7 @@ export default function ssgBuild(): Plugin {
 
       await build({
         mode: SSG_MODE,
-        logLevel: 'silent',
+        // logLevel: 'silent',
         build: {
           outDir: buildDir,
           emptyOutDir: false,
