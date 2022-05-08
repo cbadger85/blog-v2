@@ -1,4 +1,3 @@
-import { Action } from 'history';
 import {
   createContext,
   ReactNode,
@@ -8,7 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useLocation, useNavigationType } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -30,18 +29,13 @@ interface PageQueryData {
   status: 'SUCCESS' | 'LOADING';
 }
 
-const FROM_POP = Symbol('FROM_POP');
-
 export function useQueryPageData(href: string): PageQueryData {
   const { queryPageData, getCacheData, setCacheData } = useContext(PageDataCacheContext);
-  const navigationType = useNavigationType();
 
   const pageCache = getCacheData(href);
 
-  const suspendedData = navigationType !== Action.Pop ? queryPageData(href) : FROM_POP;
-
   useEffect(() => {
-    if (!pageCache && navigationType === Action.Pop) {
+    if (!pageCache) {
       setCacheData(href, { status: 'LOADING' });
       loadStaticProps(href)
         .then((data) => {
@@ -49,11 +43,9 @@ export function useQueryPageData(href: string): PageQueryData {
         })
         .catch((error) => setCacheData(href, { status: 'ERROR', error }));
     }
-  }, [href, navigationType, pageCache, setCacheData]);
+  }, [href, pageCache, setCacheData]);
 
-  if (suspendedData !== FROM_POP) {
-    return { status: 'SUCCESS', data: suspendedData };
-  }
+  const suspendedData = queryPageData(href);
 
   switch (pageCache?.status) {
     case 'ERROR':
@@ -61,7 +53,7 @@ export function useQueryPageData(href: string): PageQueryData {
     case 'SUCCESS':
       return { status: 'SUCCESS', data: pageCache.data };
     default:
-      return { status: 'LOADING' };
+      return suspendedData ? { status: 'SUCCESS', data: suspendedData } : { status: 'LOADING' };
   }
 }
 
@@ -128,6 +120,10 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
     (href: string) => {
       const currentData = cache[href];
 
+      if (!currentData) {
+        return undefined;
+      }
+
       switch (currentData?.status) {
         case 'ERROR':
           throw currentData.error;
@@ -135,6 +131,8 @@ export function PageDataCache({ initialProps, children }: PageDataCacheProps) {
           throw currentData.pendingData;
         case 'SUCCESS':
           return currentData.data;
+        case 'LOADING':
+          return undefined;
         default:
           throw loadData(href);
       }
