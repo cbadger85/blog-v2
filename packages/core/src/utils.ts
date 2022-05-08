@@ -8,3 +8,9 @@ export function getPathFromSourcepath(sourcePath: string): string {
 
   return path || '/';
 }
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

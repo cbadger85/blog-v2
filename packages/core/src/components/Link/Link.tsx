@@ -25,8 +25,8 @@ export interface LinkProps {
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   ({ to, replace = false, target, children, state }, ref) => {
     const href = useHref(to);
-    const handleClick = useLinkClickHandler(to, { replace, target, state });
-    const [_, startTransition] = usePageTransition();
+    const [isPending, startTransition] = usePageTransition();
+    const handleClick = useLinkClickHandler(to, { replace: isPending || replace, target, state });
 
     const preload = usePreload();
 

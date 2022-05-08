@@ -9,16 +9,23 @@ export async function getStaticPaths() {
   return posts.map((slug) => ({ slug }));
 }
 export async function getStaticProps({ params: { slug } }: StaticPropsContext<{ slug: string }>) {
-  const { content } = await import(/* @vite-ignore */ `../../../content/posts/${slug}/index.md`);
+  const { content, frontmatter } = await import(
+    /* @vite-ignore */ `../../../content/posts/${slug}/index.md`
+  );
 
-  return { slug, content };
+  return { slug, content, frontmatter };
 }
 
 export default function Post({ content }: FromStaticProps<typeof getStaticProps>) {
   const MdComponent = useMemo(
     () =>
-      unified().use(rehypeParse).use(rehypeReact, { createElement, Fragment }).processSync(content)
-        .result,
+      unified()
+        .use(rehypeParse, { fragment: true })
+        .use(rehypeReact, {
+          createElement,
+          Fragment,
+        })
+        .processSync(content).result,
     [content],
   );
 
