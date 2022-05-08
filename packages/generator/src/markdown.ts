@@ -1,5 +1,9 @@
 import { type Plugin } from 'vite';
 import { stripIndent } from 'common-tags';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import { unified } from 'unified';
+import rehypeStringify from 'rehype-stringify';
 
 export default function injectMarkdown(): Plugin {
   return {
@@ -7,7 +11,7 @@ export default function injectMarkdown(): Plugin {
 
     async transform(code, id) {
       if (id.endsWith('.md')) {
-        const data = parseCode(code);
+        const data = await parseCode(code);
         return {
           code: getTransformCode(data),
         };
@@ -23,16 +27,24 @@ export default function injectMarkdown(): Plugin {
   };
 }
 
-interface MarkdownData {
-  markdown: string;
+interface ContentData {
+  content: string;
 }
 
-function parseCode(code: string): MarkdownData {
-  return { markdown: code.replace(/'/g, "\\'").replace(/\r?\n|\r/g, `\\n' + '`) };
+async function parseCode(code: string): Promise<ContentData> {
+  const vfile = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeStringify)
+    .process(code);
+
+  return {
+    content: String(vfile),
+  };
 }
 
-function getTransformCode({ markdown }: MarkdownData): string {
+function getTransformCode({ content }: ContentData): string {
   return stripIndent`
-    export default '${markdown}';
+    export const content = ${JSON.stringify(content)};
   `;
 }
