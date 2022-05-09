@@ -1,6 +1,8 @@
+import { promises } from 'fs';
 import { createRequire } from 'module';
 import path from 'path';
 import type { OutputChunk } from 'rollup';
+import { fileURLToPath } from 'url';
 import { build, Plugin, ResolvedConfig } from 'vite';
 import { writePageFiles } from './utils/fileUtils';
 import { getUrlToPageAssets, Manifest } from './utils/pageUtils';
@@ -8,6 +10,8 @@ import { getUrlToPageAssets, Manifest } from './utils/pageUtils';
 const SSG_MODE = 'ssg';
 
 const require = createRequire(/* @vite-ignore */ import.meta.url);
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default function ssgBuild(): Plugin {
   let resolvedConfig: ResolvedConfig;
@@ -53,9 +57,14 @@ export default function ssgBuild(): Plugin {
       const serverFilename = 'server.js';
       const serverFilepath = path.resolve(buildDir, serverFilename);
 
+      const tempDir = path.join(__dirname, 'public');
+
+      await promises.mkdir(path.join(__dirname, 'public'));
+
       await build({
         mode: SSG_MODE,
-        // logLevel: 'silent',
+        logLevel: 'silent',
+        publicDir: tempDir,
         build: {
           outDir: buildDir,
           emptyOutDir: false,

@@ -1,22 +1,43 @@
-import { type Plugin } from 'vite';
-import { stripIndent } from 'common-tags';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import { unified } from 'unified';
-import rehypeStringify from 'rehype-stringify';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import rehypeToc from 'rehype-toc';
-import remarkFrontmatter from 'remark-frontmatter';
-import remarkParseFrontmatter from 'remark-parse-frontmatter';
+import { promises } from 'fs';
+import path from 'path';
+import { ResolvedConfig, type Plugin } from 'vite';
+import { createDir } from './utils/fileUtils';
+import { getTransformCode, parseCode } from './utils/mdUtils';
+
+const SSG_MODE = 'ssg';
 
 export default function injectMarkdown(): Plugin {
+  let resolvedConfig: ResolvedConfig;
+
   return {
     name: 'ssg:markdown',
 
+    configResolved(config) {
+      resolvedConfig = config;
+    },
+
     async transform(code, id) {
       if (id.endsWith('.md')) {
-        const data = await parseCode(code);
+        const slug = path.basename(path.dirname(id));
+
+        const data = await parseCode(code, {
+          public: `/images/${slug}`,
+        });
+
+        if (resolvedConfig.mode === SSG_MODE || resolvedConfig.command === 'serve') {
+          const imageDir = path.join(process.cwd(), 'public/images', slug);
+
+          await createDir(imageDir);
+
+          const contentDir = path.dirname(id);
+
+          await Promise.all(
+            data.images.map(async (image) => {
+              promises.copyFile(path.join(contentDir, image), path.join(imageDir, image));
+            }),
+          );
+        }
+
         return {
           code: getTransformCode(data),
         };
@@ -30,34 +51,4 @@ export default function injectMarkdown(): Plugin {
       console.error(err);
     },
   };
-}
-
-interface ContentData {
-  content: string;
-  frontmatter: unknown;
-}
-
-async function parseCode(code: string): Promise<ContentData> {
-  const vfile = await unified()
-    .use(remarkParse)
-    .use(remarkFrontmatter)
-    .use(remarkParseFrontmatter)
-    .use(remarkRehype)
-    .use(rehypeSlug)
-    .use(rehypeAutolinkHeadings)
-    .use(rehypeToc)
-    .use(rehypeStringify)
-    .process(code);
-
-  return {
-    content: String(vfile),
-    frontmatter: vfile.data?.frontmatter,
-  };
-}
-
-function getTransformCode({ content, frontmatter }: ContentData): string {
-  return stripIndent`
-    export const content = ${JSON.stringify(content)};
-    export const frontmatter = ${JSON.stringify(frontmatter)};
-  `;
 }

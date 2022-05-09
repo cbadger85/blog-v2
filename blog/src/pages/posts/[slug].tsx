@@ -9,14 +9,26 @@ export async function getStaticPaths() {
   return posts.map((slug) => ({ slug }));
 }
 export async function getStaticProps({ params: { slug } }: StaticPropsContext<{ slug: string }>) {
-  const { content, frontmatter } = await import(
+  const { content, frontmatter, toc } = await import(
     /* @vite-ignore */ `../../../content/posts/${slug}/index.md`
   );
 
-  return { slug, content, frontmatter };
+  return { slug, content, frontmatter, toc };
 }
 
-export default function Post({ content }: FromStaticProps<typeof getStaticProps>) {
+export default function Post({ content, toc }: FromStaticProps<typeof getStaticProps>) {
+  const TocComponent = useMemo(
+    () =>
+      unified()
+        .use(rehypeParse, { fragment: true })
+        .use(rehypeReact, {
+          createElement,
+          Fragment,
+        })
+        .processSync(toc).result,
+    [toc],
+  );
+
   const MdComponent = useMemo(
     () =>
       unified()
@@ -30,5 +42,10 @@ export default function Post({ content }: FromStaticProps<typeof getStaticProps>
   );
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <div>{MdComponent}</div>;
+  return (
+    <div>
+      {TocComponent}
+      {MdComponent}
+    </div>
+  );
 }

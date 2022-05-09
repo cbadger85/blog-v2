@@ -62,6 +62,6 @@ export async function writePageFiles(
   }
 }
 
-async function createDir(dirname: string) {
+export async function createDir(dirname: string) {
   await promises.mkdir(dirname, { recursive: true }).catch((e) => console.error(e));
 }

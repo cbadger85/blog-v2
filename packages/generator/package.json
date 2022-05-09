@@ -15,6 +15,9 @@
   },
   "dependencies": {
     "common-tags": "^1.8.2",
+    "hast-util-parse-selector": "^3.1.0",
+    "hast-util-select": "^5.0.1",
+    "mdast": "^3.0.0",
     "react-router-dom": "^6.3.0",
     "rehype-autolink-headings": "^6.1.1",
     "rehype-slug": "^5.0.1",
@@ -24,6 +27,7 @@
     "remark-parse": "^10.0.1",
     "remark-parse-frontmatter": "^1.0.3",
     "remark-rehype": "^10.1.0",
+    "remove": "^0.1.5",
     "unified": "^10.1.2",
     "vite": "^2.9.5"
   },
