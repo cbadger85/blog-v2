@@ -14,6 +14,8 @@ build/
 dist/
 lib/
 
+blog/public/images
+
 tsconfig.tsbuildinfo
 
 .turbo
