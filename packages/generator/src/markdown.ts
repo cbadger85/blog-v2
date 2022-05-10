@@ -1,7 +1,7 @@
 import { promises } from 'fs';
 import path from 'path';
 import { ResolvedConfig, type Plugin } from 'vite';
-import { createDir } from './utils/fileUtils';
+import { createDir, rmDir } from './utils/fileUtils';
 import { getTransformCode, parseCode } from './utils/mdUtils';
 
 const SSG_MODE = 'ssg';
@@ -12,8 +12,12 @@ export default function injectMarkdown(): Plugin {
   return {
     name: 'ssg:markdown',
 
-    configResolved(config) {
+    async configResolved(config) {
       resolvedConfig = config;
+
+      if (resolvedConfig.mode === SSG_MODE || resolvedConfig.command === 'serve') {
+        await rmDir(path.join(process.cwd(), 'public/images'));
+      }
     },
 
     async transform(code, id) {
@@ -47,8 +51,15 @@ export default function injectMarkdown(): Plugin {
     },
 
     buildEnd(err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
+      if (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
     },
+
+    // resolveFileUrl(options) {
+    //   console.log('resolveFileUrl');
+    //   console.dir(options);
+    // },
   };
 }

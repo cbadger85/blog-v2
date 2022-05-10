@@ -14,7 +14,7 @@ build/
 dist/
 lib/
 
-blog/public/images
+blog/public/content
 
 tsconfig.tsbuildinfo
 

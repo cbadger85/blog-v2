@@ -3,6 +3,7 @@ import { createElement, Fragment, useMemo } from 'react';
 import rehypeReact from 'rehype-react';
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
+import 'highlight.js/styles/github-dark.css';
 
 export async function getStaticPaths() {
   const posts = (await import('../../content')).getPosts();

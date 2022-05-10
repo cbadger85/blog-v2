@@ -63,5 +63,9 @@ export async function writePageFiles(
 }
 
 export async function createDir(dirname: string) {
-  await promises.mkdir(dirname, { recursive: true }).catch((e) => console.error(e));
+  await promises.mkdir(dirname, { recursive: true }).catch((e) => console.error('DOUBLE OOPS', e));
+}
+
+export async function rmDir(dirname: string) {
+  await promises.rm(dirname, { recursive: true, force: true }).catch((e) => console.error(e));
 }

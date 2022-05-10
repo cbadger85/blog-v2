@@ -5,5 +5,8 @@ import config from './config';
 import markdown from './markdown';
 
 export default function ssg(): Plugin[] {
-  return [config(), markdown(), dev(), build()];
+  let publicDir: string;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return [config({ publicDir }), markdown({ clientPublicDir: publicDir }), dev(), build()];
 }

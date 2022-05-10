@@ -12,6 +12,7 @@ import remarkParseFrontmatter from 'remark-parse-frontmatter';
 import remarkRehype from 'remark-rehype';
 import { selectAll, select, HastNode } from 'hast-util-select';
 import { Root } from 'hast-util-select/lib/types';
+import rehypeHighlight from 'rehype-highlight';
 
 interface ContentData {
   content: string;
@@ -72,6 +73,7 @@ export async function parseCode(
   const contentVFile = await remarkToRehype()
     .use(remarkImageRewrite, { public: options.public })
     .use(rehypeAutolinkHeadings)
+    .use(rehypeHighlight)
     .use(rehypeStringify)
     .process(code);
 
