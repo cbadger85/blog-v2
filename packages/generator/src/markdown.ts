@@ -16,7 +16,7 @@ export default function injectMarkdown(): Plugin {
       resolvedConfig = config;
 
       if (resolvedConfig.mode === SSG_MODE || resolvedConfig.command === 'serve') {
-        await rmDir(path.join(process.cwd(), 'public/images'));
+        await rmDir(path.join(process.cwd(), 'public/content'));
       }
     },
 
@@ -25,11 +25,11 @@ export default function injectMarkdown(): Plugin {
         const slug = path.basename(path.dirname(id));
 
         const data = await parseCode(code, {
-          public: `/images/${slug}`,
+          public: `/content/${slug}`,
         });
 
         if (resolvedConfig.mode === SSG_MODE || resolvedConfig.command === 'serve') {
-          const imageDir = path.join(process.cwd(), 'public/images', slug);
+          const imageDir = path.join(process.cwd(), 'public/content', slug);
 
           await createDir(imageDir);
 
